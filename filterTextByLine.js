@@ -5,7 +5,7 @@
 const fs = require("fs");
 
 // 读取文件的路径
-const filePath = "/Users/liufulin/Desktop/history20230814.txt";
+const filePath = "history.txt";
 
 // 使用UTF-8编码读取文件内容
 fs.readFile(filePath, "utf-8", (err, data) => {
