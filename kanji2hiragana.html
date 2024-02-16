@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kanji to hiragana</title>
+    <style>
+      .sentence {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 20px;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Get Kana</h1>
+    <p>Enter a sentence to get the kana reading</p>
+    <a
+      href="https://github.com/lfl976/NihongoSlicer"
+      target="_blank"
+      rel="noopener noreferrer"
+      >github</a
+    >
+    <form>
+      <input
+        class="sentence"
+        type="text"
+        id="kana"
+        name="kana"
+        value="千葉放送局マスコットキャラクターのラッカ星人も登場"
+      />
+      <button type="button" onclick="getkana()">get kana</button>
+      <button type="button" onclick="speak()">Speak📢</button>
+    </form>
+    <br />
+    <div id="result"></div>
+
+    <script>
+      function getkana() {
+        const kana = document.getElementById("kana").value;
+        if (kana) {
+          const params = new URLSearchParams();
+          params.append("text", kana);
+          fetch("http://127.0.0.1:5000/tokenize?" + params.toString())
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              const result = convertToRuby(data);
+              document.getElementById("result").innerHTML = result;
+            });
+        }
+      }
+
+      function isKana(char) {
+        // 平假名和片假名的 Unicode 范围
+        const hiraganaRange = /^[\u3040-\u309F]+$/;
+        const katakanaRange = /^[\u30A0-\u30FF]+$/;
+        return hiraganaRange.test(char) || katakanaRange.test(char);
+      }
+
+      function convertToRuby(data) {
+        let result = "";
+        data.forEach((item) => {
+          if (isKana(item.word)) {
+            result += item.word;
+          } else {
+            result += `<ruby>${item.word}<rp>(</rp><rt>${item.reading}</rt><rp>)</rp></ruby>`;
+          }
+        });
+        return result;
+      }
+
+      // 创建一个新的语音合成实例
+      const synth = window.speechSynthesis;
+
+      // 创建一个函数来朗读文本
+      function speakText(text, lang = "ja-JP") {
+        // 创建一个新的语音合成消息
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // 设置朗读的语言
+        utterance.lang = lang;
+        // 开始朗读文本
+        synth.speak(utterance);
+      }
+
+      function speak() {
+        const text = document.getElementById("kana").value;
+        if (text) {
+          speakText(text);
+        }
+      }
+    </script>
+  </body>
+</html>

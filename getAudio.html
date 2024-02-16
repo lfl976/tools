@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      // 创建一个新的语音识别对象
+      const recognition = new webkitSpeechRecognition();
+
+      // 设置语音识别对象的参数
+      recognition.continuous = true; // 持续监听语音输入
+      recognition.lang = "zh-CN"; // 设置语言为中文简体
+
+      // 当语音识别对象识别到语音时触发该事件
+      recognition.onresult = function (event) {
+        // 获取识别到的最后一个结果
+        const result = event.results[event.results.length - 1];
+        // 获取转换后的文字
+        const transcript = result[0].transcript;
+
+        // 输出转换后的文字
+        console.log("识别结果：", transcript);
+      };
+
+      // 开始监听麦克风输入
+      recognition.start();
+    </script>
+  </body>
+</html>
