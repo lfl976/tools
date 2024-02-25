@@ -24,20 +24,46 @@
       >github</a
     >
     <form>
-      <input
+      <textarea
         class="sentence"
         type="text"
         id="kana"
         name="kana"
         value="千葉放送局マスコットキャラクターのラッカ星人も登場"
-      />
-      <button type="button" onclick="getkana()">get kana</button>
+        rows="6"
+      ></textarea>
+      <span id="number"></span><br />
+      <button type="button" onclick="getkana()">Get kana</button>
       <button type="button" onclick="speak()">Speak📢</button>
     </form>
     <br />
+    <button type="button" onclick="copy()">Copy with furigana</button>
+    <button type="button" onclick="copy(true)">Copy plain text</button>
     <div id="result"></div>
 
     <script>
+      document.getElementById("kana").addEventListener("input", function () {
+        document.getElementById("number").innerHTML =
+          "Number of characters: " + this.value.length;
+      });
+
+      function copy(isPlain = false) {
+        // 找到要复制的div
+        var originalDiv = document.querySelector("#result");
+
+        // 将div及其内部内容的outerHTML复制到剪贴板
+        navigator.clipboard
+          .writeText(
+            isPlain ? originalDiv.dataset.setence : originalDiv.outerHTML
+          )
+          .then(function () {
+            console.log("HTML内容已成功复制到剪贴板");
+          })
+          .catch(function (err) {
+            console.error("复制失败：", err);
+          });
+      }
+
       function getkana() {
         const kana = document.getElementById("kana").value;
         if (kana) {
@@ -48,7 +74,9 @@
             .then((data) => {
               console.log(data);
               const result = convertToRuby(data);
-              document.getElementById("result").innerHTML = result;
+              const resultDiv = document.getElementById("result");
+              resultDiv.innerHTML = result;
+              resultDiv.dataset.setence = kana;
             });
         }
       }
