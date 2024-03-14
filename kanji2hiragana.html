@@ -40,6 +40,7 @@
     <button type="button" onclick="copy()">Copy with furigana</button>
     <button type="button" onclick="copy(true)">Copy plain text</button>
     <div id="result"></div>
+    <ul id="all-result"></ul>
 
     <script>
       document.getElementById("kana").addEventListener("input", function () {
@@ -77,6 +78,17 @@
               const resultDiv = document.getElementById("result");
               resultDiv.innerHTML = result;
               resultDiv.dataset.setence = kana;
+              const allResult = document.getElementById("all-result");
+              const li = document.createElement("li");
+              li.dataset.setence = kana;
+              li.addEventListener(
+                "click",
+                function (kana) {
+                  speakText(kana);
+                }.bind(this, kana)
+              );
+              li.innerHTML = result;
+              allResult.appendChild(li);
             });
         }
       }
