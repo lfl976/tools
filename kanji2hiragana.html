@@ -12,10 +12,19 @@
         font-size: 20px;
         box-sizing: border-box;
       }
+      #result {
+        padding: 20px 0;
+      }
+      .flex-1 {
+        flex: 1;
+      }
+      .result-wrap, .title {
+        display: flex;
+      }
     </style>
   </head>
   <body>
-    <h1>Get Kana</h1>
+    <h1>Kanji to Kana</h1>
     <p>Enter a sentence to get the kana reading</p>
     <a
       href="https://github.com/lfl976/NihongoSlicer"
@@ -24,23 +33,44 @@
       >github</a
     >
     <form>
-      <textarea
+      <input
         class="sentence"
         type="text"
         id="kana"
         name="kana"
         value="千葉放送局マスコットキャラクターのラッカ星人も登場"
         rows="6"
-      ></textarea>
+      ></input>
       <span id="number"></span><br />
-      <button type="button" onclick="getkana()">Get kana</button>
-      <button type="button" onclick="speak()">Speak📢</button>
+      <button type="button" onclick="getkana()">Convert</button>
+      <button type="button" onclick="speak()">Speak</button>
     </form>
     <br />
-    <button type="button" onclick="copy()">Copy with furigana</button>
-    <button type="button" onclick="copy(true)">Copy plain text</button>
-    <div id="result"></div>
-    <ul id="all-result"></ul>
+    <div class="title">
+      <div class="flex-1">
+        <h2>result</h2>
+        <button type="button" onclick="copy()">Copy with furigana</button>
+        <button type="button" onclick="copy(true)">Copy plain text</button>
+      </div>
+      <div class="flex-1">
+        <h2 class="flex-1">convert list</h2>
+      </div>
+      <div class="flex-1">
+        <h2 class="flex-1">history list</h2>
+      </div>
+    </div>
+    
+    <div class="result-wrap">
+      <div class="flex-1">
+        <div id="result"></div>
+      </div>
+      <div class="flex-1">
+        <ul id="all-result"></ul>
+      </div>
+      <div class="flex-1">
+        <div id="history"></div>
+      </div>
+    </div>
 
     <script>
       document.getElementById("kana").addEventListener("input", function () {
@@ -65,6 +95,9 @@
           });
       }
 
+      const resultDiv = document.getElementById("result");
+      const allResult = document.getElementById("all-result");
+      const historyDiv = document.getElementById("history");
       function getkana() {
         const kana = document.getElementById("kana").value;
         if (kana) {
@@ -75,10 +108,8 @@
             .then((data) => {
               console.log(data);
               const result = convertToRuby(data);
-              const resultDiv = document.getElementById("result");
               resultDiv.innerHTML = result;
               resultDiv.dataset.setence = kana;
-              const allResult = document.getElementById("all-result");
               const li = document.createElement("li");
               li.dataset.setence = kana;
               li.addEventListener(
@@ -89,6 +120,10 @@
               );
               li.innerHTML = result;
               allResult.appendChild(li);
+              
+              const historyLi = document.createElement("li");
+              historyLi.textContent = kana;
+              historyDiv.appendChild(historyLi);
             });
         }
       }
@@ -100,10 +135,14 @@
         return hiraganaRange.test(char) || katakanaRange.test(char);
       }
 
+      function isPunctuation(character) {
+        return /^[\p{P}]+$/u.test(character);
+      }
+
       function convertToRuby(data) {
         let result = "";
         data.forEach((item) => {
-          if (isKana(item.word)) {
+          if (isKana(item.word) || isPunctuation(item.word)) {
             result += item.word;
           } else {
             result += `<ruby>${item.word}<rp>(</rp><rt>${item.reading}</rt><rp>)</rp></ruby>`;
