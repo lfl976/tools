@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>export text</title>
+  </head>
+  <body>
+    <ul id="text-content">
+      <li>hello world</li>
+      <li>are you ok</li>
+    </ul>
+    <button type="button" onclick="exportText()">Export Text</button>
+    <button type="button" onclick="copy()">Copy</button>
+    <button type="button" onclick="copyHTML()">Copy HTML</button>
+    <script>
+      var textContent = document.getElementById("text-content").innerText;
+      console.log(textContent);
+
+      function exportText() {
+        var textContent = document.getElementById("text-content").innerText;
+        var blob = new Blob([textContent], { type: "text/plain" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "text.txt";
+        a.click();
+      }
+
+      function copy() {
+        var textContent = document.getElementById("text-content").innerText;
+        navigator.clipboard.writeText(textContent).then(function () {
+          console.log("Text copied to clipboard");
+        });
+      }
+
+      function copyHTML() {
+        var textContent = document.getElementById("text-content").outerHTML;
+        navigator.clipboard.writeText(textContent).then(function () {
+          console.log("HTML copied to clipboard");
+        });
+      }
+    </script>
+  </body>
+</html>

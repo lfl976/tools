@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Date Picker</title>
+    <style>
+      /* 自定义日期选择器样式 */
+      .datepicker {
+        position: relative;
+        display: inline-block;
+      }
+
+      .datepicker input {
+        padding: 8px;
+        font-size: 16px;
+      }
+
+      .datepicker .calendar {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+
+      .datepicker .calendar.active {
+        display: block;
+      }
+
+      .datepicker .calendar table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .datepicker .calendar th,
+      .datepicker .calendar td {
+        padding: 8px;
+        text-align: center;
+      }
+
+      .datepicker .calendar th {
+        font-weight: bold;
+      }
+
+      .datepicker .calendar td {
+        cursor: pointer;
+      }
+
+      .datepicker .calendar td:hover {
+        background-color: #f2f2f2;
+      }
+
+      .datepicker .calendar td.today {
+        background-color: #ffcccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="datepicker">
+      <input type="text" id="datepickerInput" placeholder="Select date" />
+      <div class="calendar" id="calendar"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const datepickerInput = document.getElementById("datepickerInput");
+        const calendar = document.getElementById("calendar");
+
+        // 生成日历
+        function generateCalendar(year, month) {
+          let date = new Date(year, month, 1);
+          const today = new Date();
+          let calendarHTML = "<table>";
+          calendarHTML +=
+            "<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>";
+          calendarHTML += "<tbody><tr>";
+
+          // 补齐上个月的日期
+          while (date.getDay() !== 0) {
+            calendarHTML += "<td></td>";
+            date.setDate(date.getDate() - 1);
+          }
+          date = new Date(year, month, 1);
+          // 生成本月日期
+          while (date.getMonth() === month) {
+            calendarHTML += "<td";
+            if (
+              date.getDate() === today.getDate() &&
+              date.getMonth() === today.getMonth() &&
+              date.getFullYear() === today.getFullYear()
+            ) {
+              calendarHTML += ' class="today"';
+            }
+            calendarHTML += ">" + date.getDate() + "</td>";
+            if (date.getDay() === 6) {
+              calendarHTML += "</tr><tr>";
+            }
+            date.setDate(date.getDate() + 1);
+          }
+
+          // 补齐下个月的日期
+          while (date.getDay() !== 0) {
+            calendarHTML += "<td></td>";
+            date.setDate(date.getDate() + 1);
+          }
+
+          calendarHTML += "</tr></tbody></table>";
+          console.log(calendarHTML);
+          calendar.innerHTML = calendarHTML;
+        }
+
+        // 为输入框添加点击事件
+        datepickerInput.addEventListener("click", function () {
+          const currentDate = new Date();
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+          generateCalendar(year, month);
+          calendar.classList.toggle("active");
+        });
+
+        // 为日历表格中的日期添加点击事件
+        calendar.addEventListener("click", function (event) {
+          if (event.target.tagName === "TD" && event.target.innerHTML !== "") {
+            const selectedDate = new Date();
+            selectedDate.setDate(event.target.innerHTML);
+            const selectedMonth = selectedDate.getMonth() + 1;
+            const formattedDate =
+              selectedDate.getFullYear() +
+              "-" +
+              (selectedMonth < 10 ? "0" : "") +
+              selectedMonth +
+              "-" +
+              (selectedDate.getDate() < 10 ? "0" : "") +
+              selectedDate.getDate();
+            datepickerInput.value = formattedDate;
+            calendar.classList.remove("active");
+          }
+        });
+
+        // 点击其他地方关闭日历
+        document.addEventListener("click", function (event) {
+          if (
+            !datepickerInput.contains(event.target) &&
+            !calendar.contains(event.target)
+          ) {
+            calendar.classList.remove("active");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
