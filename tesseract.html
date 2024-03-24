@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tesseract OCR</title>
+    <!-- v5 -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+      .img-preview td {
+        width: 200px;
+      }
+      .img-preview img {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tesseract OCR</h1>
+    <p>Recognize text from image</p>
+    <input type="file" id="file" /><br />
+    <select id="lang">
+      <option value="jpn">Japanese</option>
+      <option value="eng">English</option>
+      <option value="chi_sim">Chinese Simplified</option>
+    </select>
+    <br /><br />
+    <table border="1" cellspacing="0" width="600" class="img-preview">
+      <tr>
+        <td>
+          <img
+            data-lang="jpn"
+            src="https://pbs.twimg.com/media/GJV5TyXawAADOf5?format=jpg&name=900x900"
+            alt=""
+          />
+        </td>
+        <td>
+          <img
+            data-lang="chi_sim"
+            src="https://tesseract.projectnaptha.com/img/chi_sim.png"
+            alt=""
+          />
+        </td>
+        <td>
+          <img
+            data-lang="eng"
+            src="https://pbs.twimg.com/media/GJZ_W06WAAAAbms?format=jpg&name=900x900"
+            alt=""
+          />
+        </td>
+      </tr>
+    </table>
+    <table border="1" cellspacing="0" width="800">
+      <tr>
+        <td>
+          <img id="img" src="" alt="" width="400" />
+        </td>
+        <td>
+          <pre id="result"></pre>
+        </td>
+      </tr>
+    </table>
+    <script>
+      const file = document.getElementById("file");
+      const lang = document.getElementById("lang");
+      const img = document.getElementById("img");
+      const result = document.getElementById("result");
+      const imgs = document.querySelectorAll(".img-preview img");
+
+      imgs.forEach((item) => {
+        item.addEventListener("click", () => {
+          file.value = "";
+          lang.value = item.dataset.lang;
+          img.src = item.src;
+          //img.dispatchEvent(new Event("load"));
+        });
+      });
+
+      file.addEventListener("change", (e) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+      });
+
+      img.addEventListener("load", async () => {
+        const worker = await Tesseract.createWorker(lang.value);
+
+        const {
+          data: { text },
+        } = await worker.recognize(img);
+        console.log(text);
+        result.textContent = text;
+        await worker.terminate();
+      });
+      //   lang.addEventListener("change", () => {
+      //     img.dispatchEvent(new Event("load"));
+      //   });
+    </script>
+  </body>
+</html>

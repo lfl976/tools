@@ -18,8 +18,12 @@
       .flex-1 {
         flex: 1;
       }
-      .result-wrap, .title {
+      .result-wrap,
+      .title {
         display: flex;
+      }
+      textarea {
+        form-sizing: normal;
       }
     </style>
   </head>
@@ -33,14 +37,13 @@
       >github</a
     >
     <form>
-      <input
+      <textarea
         class="sentence"
         type="text"
         id="kana"
         name="kana"
         value="千葉放送局マスコットキャラクターのラッカ星人も登場"
-        rows="6"
-      ></input>
+      ></textarea>
       <span id="number"></span><br />
       <button type="button" onclick="getkana()">Convert</button>
       <button type="button" onclick="speak()">Speak</button>
@@ -59,7 +62,7 @@
         <h2 class="flex-1">history list</h2>
       </div>
     </div>
-    
+
     <div class="result-wrap">
       <div class="flex-1">
         <div id="result"></div>
@@ -120,7 +123,7 @@
               );
               li.innerHTML = result;
               allResult.appendChild(li);
-              
+
               const historyLi = document.createElement("li");
               historyLi.textContent = kana;
               historyDiv.appendChild(historyLi);
