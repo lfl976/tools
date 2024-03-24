@@ -13,18 +13,32 @@
       .img-preview img {
         width: 100%;
       }
+      #url {
+        width: 300px;
+      }
     </style>
   </head>
   <body>
     <h1>Tesseract OCR</h1>
     <p>Recognize text from image</p>
-    <input type="file" id="file" /><br />
     <select id="lang">
       <option value="jpn">Japanese</option>
       <option value="eng">English</option>
       <option value="chi_sim">Chinese Simplified</option>
     </select>
-    <br /><br />
+    <br />
+    <br />
+    <table border="1" cellspacing="0" width="600">
+      <tr>
+        <td>
+          <input type="file" id="file" />
+        </td>
+        <td>
+          <input type="text" id="url" width="300px" />
+        </td>
+      </tr>
+    </table>
+    <br />
     <table border="1" cellspacing="0" width="600" class="img-preview">
       <tr>
         <td>
@@ -66,6 +80,15 @@
       const img = document.getElementById("img");
       const result = document.getElementById("result");
       const imgs = document.querySelectorAll(".img-preview img");
+      const url = document.getElementById("url");
+
+      url.addEventListener("change", () => {
+        console.log(url.value);
+        // file.value = "";
+        // lang.value = "eng";
+        img.src = url.value;
+        //img.dispatchEvent(new Event("load"));
+      });
 
       imgs.forEach((item) => {
         item.addEventListener("click", () => {
