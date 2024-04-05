@@ -6,3 +6,4 @@
 - 文本导出：[export-copy-text.html](export-copy-text.html)
 - 时间选择器：[date-picker.html](date-picker.html)
 - Tesseract OCR：[tesseract.html](tesseract.html)
+- Convert Arabic Number to Japanese Number：[converToJapaneseNumber.html](converToJapaneseNumber.html)

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>converToJapaneseNumber</title>
+		<style>
+			body {
+				font-family: 'Courier New', Courier, monospace;
+			}
+			@media screen and (max-width: 600px) {
+				main {
+					width: 100%;
+					margin: 0 auto;
+					border: 1px solid #ccc;
+				}
+			}
+			@media screen and (min-width: 600px) {
+				main {
+					display: flex;
+					flex-wrap: wrap;
+					align-items: center;
+					width: 80%;
+					margin: 0 auto;
+					border: 1px solid #ccc;
+				}
+			}
+			.input,
+			.output {
+				flex: 3;
+			}
+			textarea {
+				display: block;
+				width: 100%;
+				height: 150px;
+				padding: 12px 20px;
+				box-sizing: border-box;
+				font-size: 24px;
+			}
+			.conver-btn {
+				flex: 1;
+				background-color: #4caf50;
+				color: white;
+				border: none;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 16px;
+				margin: 4px 2px;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Convert Arabic Number to Japanese Number</h1>
+		<p>
+			Convert Arabic Number to Japanese Number. For example, 1234 will be
+			converted to せんにひゃくさんじゅうよん.
+		</p>
+
+		<main>
+			<div class="input">
+				<!-- <label for="arabicNumber">Arabic Number:</label> -->
+				<textarea type="number" id="arabicNumber" min="0">1234</textarea>
+			</div>
+			<button class="conver-btn" onclick="getOutput()">Convert</button>
+			<div class="output">
+				<!-- <label for="japaneseNumber">Japanese Number:</label> -->
+				<textarea type="text" id="japaneseNumber"></textarea>
+			</div>
+		</main>
+		<script>
+			// const convertToJapaneseNumber = (number) => {
+			// 	const japaneseNumbers = [
+			// 		'〇',
+			// 		'一',
+			// 		'二',
+			// 		'三',
+			// 		'四',
+			// 		'五',
+			// 		'六',
+			// 		'七',
+			// 		'八',
+			// 		'九',
+			// 	];
+			// 	return number
+			// 		.toString()
+			// 		.split('')
+			// 		.map((digit) => japaneseNumbers[parseInt(digit)])
+			// 		.join('');
+			// };
+
+			// console.log(convertToJapaneseNumber(1234567890)); // 一二三四五六七八九〇
+
+			// 定义一些辅助变量
+			const units = [
+				'',
+				'いち',
+				'に',
+				'さん',
+				'よん',
+				'ご',
+				'ろく',
+				'なな',
+				'はち',
+				'きゅう',
+			];
+			const tens = [
+				'',
+				'じゅう',
+				'にじゅう',
+				'さんじゅう',
+				'よんじゅう',
+				'ごじゅう',
+				'ろくじゅう',
+				'ななじゅう',
+				'はちじゅう',
+				'きゅうじゅう',
+			];
+			const hundreds = [
+				'',
+				'ひゃく',
+				'にひゃく',
+				'さんびゃく',
+				'よんひゃく',
+				'ごひゃく',
+				'ろっぴゃく',
+				'ななひゃく',
+				'はっぴゃく',
+				'きゅうひゃく',
+			];
+			const thousands = [
+				'',
+				'せん',
+				'にせん',
+				'さんぜん',
+				'よんせん',
+				'ごせん',
+				'ろくせん',
+				'ななせん',
+				'はっせん',
+				'きゅうせん',
+			];
+			const higher_units = ['', 'まん', 'おく', 'ちょう'];
+			function conver(num, s = '') {
+				// 处理0的情况
+				if (num === 0) {
+					return '';
+				}
+
+				// 初始化结果
+				let result = '';
+
+				if (num >= 1000) {
+					// 处理千位,2531
+					const digit = Math.floor(num / 1000);
+					result += thousands[digit] + conver(num % 1000, '');
+				} else if (num >= 100) {
+					// 处理百位,531
+					const digit = Math.floor(num / 100);
+					result += hundreds[digit] + conver(num % 100, '');
+				} else if (num >= 10) {
+					// 处理十位,31
+					const digit = Math.floor(num / 10);
+					result += tens[digit] + conver(num % 10, '');
+				} else if (num > 0) {
+					// 处理个位,1
+					result += units[num];
+				}
+
+				result += s;
+
+				return result;
+			}
+
+			function arabic_to_japanese(n) {
+				n = parseInt(n);
+				console.log(typeof n);
+				if (n === 0) {
+					return 'ゼロ';
+				}
+				// 特殊处理
+				if (n === 10000000) {
+					return 'いっせんまん';
+				}
+				let out = '';
+
+				// 10^12 = 1兆
+				out += conver(
+					parseInt(BigInt(n) / BigInt(10000_0000_0000)),
+					higher_units[3]
+				);
+				//n %= 1000000000000;
+				// 10^8 = 1億
+				out += conver(
+					parseInt(BigInt(n) / BigInt(10000_0000)) % 10000,
+					higher_units[2]
+				);
+				//n %= 100000000;
+				// 10^4 = 1万
+				out += conver(parseInt(n / 10000) % 10000, higher_units[1]);
+				//n %= 10000;
+				// 10^0 = 1
+				out += conver(n % 10000, '');
+
+				return out;
+			}
+
+			getOutput = () => {
+				const arabicNumber = document.getElementById('arabicNumber').value;
+				document.getElementById('japaneseNumber').value =
+					arabic_to_japanese(arabicNumber);
+			};
+			getOutput();
+			// 测试用例
+			// console.log(arabic_to_japanese(123456789)); // いちおくにせんさんびゃくよんじゅうごまんろくせんななひゃくはちじゅうきゅう
+		</script>
+	</body>
+</html>
