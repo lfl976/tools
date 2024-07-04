@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>公历年份转换为日本年号</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				margin: 0;
+				background-color: #f0f0f0;
+			}
+			.container {
+				text-align: center;
+				background-color: #fff;
+				padding: 20px;
+				border-radius: 8px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+			input {
+				padding: 10px;
+				font-size: 16px;
+				border-radius: 4px;
+				border: 1px solid #ccc;
+				margin-bottom: 10px;
+				width: -webkit-fill-available;
+			}
+			button {
+				padding: 10px 20px;
+				font-size: 16px;
+				border: none;
+				border-radius: 4px;
+				background-color: #007bff;
+				color: white;
+				cursor: pointer;
+				margin-bottom: 10px;
+			}
+			button:hover {
+				background-color: #0056b3;
+			}
+			.result {
+				font-size: 18px;
+				margin-top: 10px;
+				color: #333;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>公历年份转换为日本年号</h1>
+			<form onsubmit="convertToJapaneseEra()">
+				<input id="gregorianYear" placeholder="请输入公历年份" />
+				<button onclick="convertToJapaneseEra()">转换</button>
+				<div id="result" class="result"></div>
+			</form>
+		</div>
+
+		<script>
+			function convertToJapaneseEra() {
+				event.preventDefault();
+				const year = parseInt(document.getElementById("gregorianYear").value);
+				const resultDiv = document.getElementById("result");
+
+				if (isNaN(year)) {
+					resultDiv.textContent = "请输入有效的年份";
+					return;
+				}
+
+				const eras = [
+					{ name: "令和", start: 2019 },
+					{ name: "平成", start: 1989 },
+					{ name: "昭和", start: 1926 },
+					{ name: "大正", start: 1912 },
+					{ name: "明治", start: 1868 },
+				];
+
+				let eraName = "不适用的年份";
+				let eraYear = 0;
+
+				for (let i = 0; i < eras.length; i++) {
+					if (year >= eras[i].start) {
+						eraYear = year - eras[i].start + 1;
+						eraName = `${eras[i].name} ${eraYear}年`;
+						break;
+					}
+				}
+
+				resultDiv.textContent = eraName;
+			}
+		</script>
+	</body>
+</html>

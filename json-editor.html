@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- when using the mode "code", it's important to specify charset utf-8 -->
+		<meta charset="utf-8" />
+
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.3/jsoneditor.min.css"
+			integrity="sha512-8G+Vb2+10BSrSo+wupdzJIylDLpGtEYniQhp0rsbTigPG7Onn2S08Ai/KEGlxN2Ncx9fGqVHtRehMuOjPb9f8g=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		/>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/ajv/8.16.0/ajv7.min.js"
+			integrity="sha512-fC8LFaUbfNEzShDPYOtZ8adynhvagDYmnta+TJL0HaMiGIe0GjVeq5yC8QVssjfS6bpn816dejXowgCXJ3MvQQ=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.3/jsoneditor.min.js"
+			integrity="sha512-KrNxmbQP5Edirsv+ahh/HcaHBXINizYSODFpcDI2cFoFCH35Z+bvtbOjwuzaWVOSkfWqGq4P/yzPljcPEnSU7A=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		></script>
+	</head>
+	<body>
+		<div id="jsoneditor" style="width: 400px; height: 400px"></div>
+
+		<script>
+			// create the editor
+			const container = document.getElementById('jsoneditor');
+			const options = {
+				modes: ['text', 'code', 'tree', 'form', 'view'],
+				mode: 'code',
+				ace: ace,
+			};
+			// var options = {
+			// 	ajv: new ajv7({
+			// 		allErrors: true,
+			// 		verbose: true,
+			// 		jsonPointers: false,
+			// 		$data: true,
+			// 	}),
+			// };
+			const editor = new JSONEditor(container, options);
+
+			// set json
+			const initialJson = {
+				Array: [1, 2, 3],
+				Boolean: true,
+				Null: null,
+				Number: 123,
+				Object: { a: 'b', c: 'd' },
+				String: 'Hello World',
+			};
+			editor.set(initialJson);
+
+			// get json
+			const updatedJson = editor.get();
+		</script>
+	</body>
+</html>
