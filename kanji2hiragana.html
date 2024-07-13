@@ -1,184 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kanji to hiragana</title>
-    <style>
-      .sentence {
-        width: 100%;
-        padding: 10px;
-        margin: 10px 0;
-        font-size: 20px;
-        box-sizing: border-box;
-      }
-      #result {
-        padding: 20px 0;
-      }
-      .flex-1 {
-        flex: 1;
-      }
-      .result-wrap,
-      .title {
-        display: flex;
-      }
-      textarea {
-        form-sizing: normal;
-      }
-      ruby {
-        text-decoration: underline;
-        margin-inline: 3px;
-        text-underline-offset: 3px;
-    }
-    </style>
-  </head>
-  <body>
-    <h1>Kanji to Kana</h1>
-    <p>Enter a sentence to get the kana reading</p>
-    <a
-      href="https://github.com/lfl976/NihongoSlicer"
-      target="_blank"
-      rel="noopener noreferrer"
-      >github</a
-    >
-    <form>
-      <textarea
-        class="sentence"
-        type="text"
-        id="kana"
-        name="kana"
-        value="千葉放送局マスコットキャラクターのラッカ星人も登場"
-      ></textarea>
-      <span id="number"></span><br />
-      <button type="button" onclick="getkana()">Convert</button>
-      <button type="button" onclick="speak()">Speak</button>
-    </form>
-    <br />
-    <div class="title">
-      <div class="flex-1">
-        <h2>result</h2>
-        <button type="button" onclick="copy()">Copy with furigana</button>
-        <button type="button" onclick="copy(true)">Copy plain text</button>
-      </div>
-      <div class="flex-1">
-        <h2 class="flex-1">convert list</h2>
-      </div>
-      <div class="flex-1">
-        <h2 class="flex-1">history list</h2>
-      </div>
-    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>kanji to hiragana</title>
+		<style>
+			.sentence {
+				width: 100%;
+				padding: 10px;
+				margin: 10px 0;
+				font-size: 20px;
+				box-sizing: border-box;
+			}
+			#result {
+				padding: 20px 0;
+			}
+			.flex-1 {
+				flex: 1;
+			}
+			.result-wrap,
+			.title {
+				display: flex;
+			}
+			textarea {
+				form-sizing: normal;
+			}
+			ruby {
+				text-decoration: underline;
+				margin-inline: 3px;
+				text-underline-offset: 3px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Kanji to Kana</h1>
+		<p>Enter a sentence to get the kana reading</p>
+		<a
+			href="https://github.com/lfl976/NihongoSlicer"
+			target="_blank"
+			rel="noopener noreferrer"
+			>github</a
+		>
+		<form>
+			<textarea
+				class="sentence"
+				type="text"
+				id="kana"
+				name="kana"
+				value="千葉放送局マスコットキャラクターのラッカ星人も登場"
+			></textarea>
+			<span id="number"></span><br />
+			<button type="button" onclick="getkana()">Convert</button>
+			<button type="button" onclick="speak()">Speak</button>
+		</form>
+		<br />
+		<div class="title">
+			<div class="flex-1">
+				<h2>result</h2>
+				<button type="button" onclick="copy()">Copy with furigana</button>
+				<button type="button" onclick="copy(true)">Copy plain text</button>
+			</div>
+			<div class="flex-1">
+				<h2 class="flex-1">convert list</h2>
+			</div>
+			<div class="flex-1">
+				<h2 class="flex-1">history list</h2>
+			</div>
+		</div>
 
-    <div class="result-wrap">
-      <div class="flex-1">
-        <div id="result"></div>
-      </div>
-      <div class="flex-1">
-        <ul id="all-result"></ul>
-      </div>
-      <div class="flex-1">
-        <div id="history"></div>
-      </div>
-    </div>
+		<div class="result-wrap">
+			<div class="flex-1">
+				<div id="result"></div>
+			</div>
+			<div class="flex-1">
+				<ul id="all-result"></ul>
+			</div>
+			<div class="flex-1">
+				<div id="history"></div>
+			</div>
+		</div>
 
-    <script>
-      document.getElementById("kana").addEventListener("input", function () {
-        document.getElementById("number").innerHTML =
-          "Number of characters: " + this.value.length;
-      });
+		<script>
+			document.getElementById("kana").addEventListener("input", function () {
+				document.getElementById("number").innerHTML =
+					"Number of characters: " + this.value.length;
+			});
 
-      function copy(isPlain = false) {
-        // 找到要复制的div
-        var originalDiv = document.querySelector("#result");
+			function copy(isPlain = false) {
+				// 找到要复制的div
+				var originalDiv = document.querySelector("#result");
 
-        // 将div及其内部内容的outerHTML复制到剪贴板
-        navigator.clipboard
-          .writeText(
-            isPlain ? originalDiv.dataset.setence : originalDiv.outerHTML
-          )
-          .then(function () {
-            console.log("HTML内容已成功复制到剪贴板");
-          })
-          .catch(function (err) {
-            console.error("复制失败：", err);
-          });
-      }
+				// 将div及其内部内容的outerHTML复制到剪贴板
+				navigator.clipboard
+					.writeText(
+						isPlain ? originalDiv.dataset.setence : originalDiv.outerHTML
+					)
+					.then(function () {
+						console.log("HTML内容已成功复制到剪贴板");
+					})
+					.catch(function (err) {
+						console.error("复制失败：", err);
+					});
+			}
 
-      const resultDiv = document.getElementById("result");
-      const allResult = document.getElementById("all-result");
-      const historyDiv = document.getElementById("history");
-      function getkana() {
-        const kana = document.getElementById("kana").value;
-        if (kana) {
-          const params = new URLSearchParams();
-          params.append("text", kana);
-          fetch("http://127.0.0.1:5000/tokenize?" + params.toString())
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-              const result = convertToRuby(data);
-              resultDiv.innerHTML = result;
-              resultDiv.dataset.setence = kana;
-              const li = document.createElement("li");
-              li.dataset.setence = kana;
-              li.addEventListener(
-                "click",
-                function (kana) {
-                  speakText(kana);
-                }.bind(this, kana)
-              );
-              li.innerHTML = result;
-              allResult.appendChild(li);
+			const resultDiv = document.getElementById("result");
+			const allResult = document.getElementById("all-result");
+			const historyDiv = document.getElementById("history");
+			function getkana() {
+				const kana = document.getElementById("kana").value;
+				if (kana) {
+					const params = new URLSearchParams();
+					params.append("text", kana);
+					fetch("http://127.0.0.1:5000/tokenize?" + params.toString())
+						.then((response) => response.json())
+						.then((data) => {
+							console.log(data);
+							const result = convertToRuby(data);
+							resultDiv.innerHTML = result;
+							resultDiv.dataset.setence = kana;
+							const li = document.createElement("li");
+							li.dataset.setence = kana;
+							li.addEventListener(
+								"click",
+								function (kana) {
+									speakText(kana);
+								}.bind(this, kana)
+							);
+							li.innerHTML = result;
+							allResult.appendChild(li);
 
-              const historyLi = document.createElement("li");
-              historyLi.textContent = kana;
-              historyDiv.appendChild(historyLi);
-            });
-        }
-      }
+							const historyLi = document.createElement("li");
+							historyLi.textContent = kana;
+							historyDiv.appendChild(historyLi);
+						});
+				}
+			}
 
-      function isKana(char) {
-        // 平假名和片假名的 Unicode 范围
-        const hiraganaRange = /^[\u3040-\u309F]+$/;
-        const katakanaRange = /^[\u30A0-\u30FF]+$/;
-        return hiraganaRange.test(char) || katakanaRange.test(char);
-      }
+			function isKana(char) {
+				// 平假名和片假名的 Unicode 范围
+				const hiraganaRange = /^[\u3040-\u309F]+$/;
+				const katakanaRange = /^[\u30A0-\u30FF]+$/;
+				return hiraganaRange.test(char) || katakanaRange.test(char);
+			}
 
-      function isPunctuation(character) {
-        return /^[\p{P}]+$/u.test(character);
-      }
+			function isPunctuation(character) {
+				return /^[\p{P}]+$/u.test(character);
+			}
 
-      function convertToRuby(data) {
-        let result = "";
-        data.forEach((item) => {
-          if (isKana(item.word) || isPunctuation(item.word)) {
-            result += item.word;
-          } else {
-            result += `<ruby>${item.word}<rp>(</rp><rt>${item.reading}</rt><rp>)</rp></ruby>`;
-          }
-        });
-        return result;
-      }
+			function convertToRuby(data) {
+				let result = "";
+				data.forEach((item) => {
+					if (isKana(item.word) || isPunctuation(item.word)) {
+						result += item.word;
+					} else {
+						result += `<ruby>${item.word}<rp>(</rp><rt>${item.reading}</rt><rp>)</rp></ruby>`;
+					}
+				});
+				return result;
+			}
 
-      // 创建一个新的语音合成实例
-      const synth = window.speechSynthesis;
+			// 创建一个新的语音合成实例
+			const synth = window.speechSynthesis;
 
-      // 创建一个函数来朗读文本
-      function speakText(text, lang = "ja-JP") {
-        // 创建一个新的语音合成消息
-        const utterance = new SpeechSynthesisUtterance(text);
+			// 创建一个函数来朗读文本
+			function speakText(text, lang = "ja-JP") {
+				// 创建一个新的语音合成消息
+				const utterance = new SpeechSynthesisUtterance(text);
 
-        // 设置朗读的语言
-        utterance.lang = lang;
-        // 开始朗读文本
-        synth.speak(utterance);
-      }
+				// 设置朗读的语言
+				utterance.lang = lang;
+				// 开始朗读文本
+				synth.speak(utterance);
+			}
 
-      function speak() {
-        const text = document.getElementById("kana").value;
-        if (text) {
-          speakText(text);
-        }
-      }
-    </script>
-  </body>
+			function speak() {
+				const text = document.getElementById("kana").value;
+				if (text) {
+					speakText(text);
+				}
+			}
+		</script>
+	</body>
 </html>
