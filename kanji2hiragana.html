@@ -49,7 +49,13 @@
 				name="kana"
 				value="千葉放送局マスコットキャラクターのラッカ星人も登場"
 			></textarea>
-			<span id="number"></span><br />
+			<span
+				>Number of characters(<a
+					href="https://taku910.github.io/mecab/#nbest"
+					target="_blank"
+					>max512</a
+				>): </span
+			><span id="number"></span><br />
 			<button type="button" onclick="getkana()">Convert</button>
 			<button type="button" onclick="speak()">Speak</button>
 		</form>
@@ -58,7 +64,8 @@
 			<div class="flex-1">
 				<h2>result</h2>
 				<button type="button" onclick="copy()">Copy with furigana</button>
-				<button type="button" onclick="copy(true)">Copy plain text</button>
+				<button type="button" onclick="copy(2)">Copy plain text</button>
+				<button type="button" onclick="copy(3)">Copy hiragana</button>
 			</div>
 			<div class="flex-1">
 				<h2 class="flex-1">convert list</h2>
@@ -82,18 +89,21 @@
 
 		<script>
 			document.getElementById("kana").addEventListener("input", function () {
-				document.getElementById("number").innerHTML =
-					"Number of characters: " + this.value.length;
+				document.getElementById("number").innerHTML = this.value.length;
 			});
 
-			function copy(isPlain = false) {
+			function copy(flag = 1) {
 				// 找到要复制的div
 				var originalDiv = document.querySelector("#result");
 
 				// 将div及其内部内容的outerHTML复制到剪贴板
 				navigator.clipboard
 					.writeText(
-						isPlain ? originalDiv.dataset.setence : originalDiv.outerHTML
+						flag === 1
+							? originalDiv.outerHTML
+							: flag === 2
+							? originalDiv.dataset.setence
+							: originalDiv.dataset.hiragana
 					)
 					.then(function () {
 						console.log("HTML内容已成功复制到剪贴板");
@@ -118,6 +128,9 @@
 							const result = convertToRuby(data);
 							resultDiv.innerHTML = result;
 							resultDiv.dataset.setence = kana;
+							resultDiv.dataset.hiragana = data
+								.map((item) => item.reading)
+								.join(" ");
 							const li = document.createElement("li");
 							li.dataset.setence = kana;
 							li.addEventListener(
