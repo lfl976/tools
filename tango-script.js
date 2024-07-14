@@ -1,4 +1,5 @@
 const wordList = ["hello", "world"];
+const importBtn = document.getElementById("importBtn");
 const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
     <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -38,7 +39,7 @@ request.onsuccess = (event) => {
 	db = event.target.result;
 	console.log("Database opened successfully");
 	// addData({ reading: "いのり", word: "祈り" });
-	updaateList();
+	updateList();
 };
 
 request.onupgradeneeded = (event) => {
@@ -119,10 +120,14 @@ function addWordToList(item) {
 	wordListElement.appendChild(li);
 }
 
-async function updaateList() {
+async function updateList() {
 	const list = await getAllData();
 	console.log("List", list);
-
+	if (list.length === 0) {
+		importBtn.classList.remove("hidden");
+	} else {
+		importBtn.classList.add("hidden");
+	}
 	list.forEach((item) => {
 		addWordToList(item);
 	});
@@ -151,3 +156,61 @@ wordListElement.addEventListener("click", (event) => {
 		speakText(word);
 	}
 });
+
+async function exportWordList() {
+	const list = await getAllData();
+	const wordList = list.map((item) => ({
+		reading: item.reading,
+		word: item.word,
+	}));
+	const data = JSON.stringify(wordList);
+	const blob = new Blob([data], { type: "application/json" });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = "wordList.json";
+	a.click();
+	URL.revokeObjectURL(url);
+}
+
+async function importWordList() {
+	const url =
+		"https://raw.githubusercontent.com/lfl976/tools/main/wordList.json";
+	const response = await fetch(url);
+	const data = await response.json();
+	console.log("Data", data);
+	data.forEach((item) => {
+		addData(item);
+	});
+	updateList();
+}
+
+function importWordListFromLocal() {
+	const input = document.createElement("input");
+	input.type = "file";
+	input.accept = ".json";
+	input.onchange = async (event) => {
+		const file = event.target.files[0];
+		const reader = new FileReader();
+		reader.onload = async (event) => {
+			const data = event.target.result;
+			const list = JSON.parse(data);
+			console.log("List", list);
+			list.forEach((item) => {
+				addData(item);
+				addWordToList(item);
+			});
+		};
+		reader.readAsText(file);
+	};
+	input.click();
+}
+
+function clearList() {
+	const wordListElement = document.getElementById("wordList");
+	wordListElement.innerHTML = "";
+	// const transaction = db.transaction(["words"], "readwrite");
+	// const objectStore = transaction.objectStore("words");
+	// objectStore.clear();
+	indexedDB.deleteDatabase("WordList");
+}

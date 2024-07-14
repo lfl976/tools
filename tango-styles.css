@@ -59,3 +59,7 @@ li ruby,
 li svg {
 	pointer-events: none;
 }
+
+.hidden {
+	display: none;
+}
