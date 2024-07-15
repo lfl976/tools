@@ -10,8 +10,8 @@ const remote = document.getElementById("remote");
 const local = document.getElementById("local");
 const wordListElement = document.getElementById("wordList");
 const googleAppScriptId = document.getElementById("googleAppScriptId");
-const localAppScriptId = localStorage.getItem("appScriptIdForWordList");
-const url = `https://script.google.com/macros/s/${localAppScriptId}/exec`;
+let localAppScriptId = localStorage.getItem("appScriptIdForWordList");
+let url = `https://script.google.com/macros/s/${localAppScriptId}/exec`;
 
 if (isRemote) {
 	remote.checked = true;
@@ -285,4 +285,7 @@ function refreshList() {
 
 googleAppScriptId.addEventListener("change", () => {
 	localStorage.setItem("appScriptIdForWordList", googleAppScriptId.value);
+	localAppScriptId = localStorage.getItem("appScriptIdForWordList");
+	url = `https://script.google.com/macros/s/${localAppScriptId}/exec`;
+	refreshList();
 });
