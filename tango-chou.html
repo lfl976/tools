@@ -9,14 +9,40 @@
 	<body>
 		<div class="container">
 			<h1>単語帳</h1>
-			<input type="text" id="wordInput" placeholder="Enter a word" />
-			<button onclick="addWord(this)">Add Word</button>
+			<div id="search">
+				<input type="text" id="wordInput" placeholder="Enter a word" />
+				<button onclick="addWord(this)">Add Word</button>
+			</div>
 			<ul id="wordList"></ul>
-			<!-- <button onclick="deleteDatabase()">delete</button> -->
-			<button onclick="exportWordList()">Export</button>
-			<button id="importBtn" class="hidden" onclick="importWordList()">
-				Import
-			</button>
+			<div id="settings">
+				<!-- <button onclick="deleteDatabase()">delete</button> -->
+				<button onclick="exportWordList()">Export</button>
+				<button id="importBtn" class="hidden" onclick="importWordList()">
+					Import
+				</button>
+				<div class="radio-buttons">
+					<label>
+						<input
+							type="radio"
+							name="storage"
+							id="local"
+							value="local"
+							checked
+						/>
+						Local
+					</label>
+					<label>
+						<input type="radio" name="storage" id="remote" value="remote" />
+						Remote
+					</label>
+				</div>
+				<input
+					type="text"
+					id="googleAppScriptId"
+					class="hidden w-100"
+					placeholder="Google App Script ID"
+				/>
+			</div>
 		</div>
 		<script src="tango-script.js"></script>
 	</body>

@@ -1,13 +1,27 @@
 const wordList = ["hello", "world"];
 const importBtn = document.getElementById("importBtn");
+const radioButtons = document.querySelectorAll('input[name="storage"]');
 const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
     <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
   </svg>`;
+const isRemote = localStorage.getItem("storageOption") === "remote";
+const remote = document.getElementById("remote");
+const local = document.getElementById("local");
+const wordListElement = document.getElementById("wordList");
+const googleAppScriptId = document.getElementById("googleAppScriptId");
+const localAppScriptId = localStorage.getItem("appScriptIdForWordList");
+const url = `https://script.google.com/macros/s/${localAppScriptId}/exec`;
+
+if (isRemote) {
+	remote.checked = true;
+	googleAppScriptId.classList.remove("hidden");
+}
+if (localAppScriptId) {
+	googleAppScriptId.value = localAppScriptId;
+}
 
 async function addWord(self) {
-	console.log("Add word");
-	console.log(self);
 	const wordInput = document.getElementById("wordInput");
 	const word = wordInput.value.trim();
 	if (word) {
@@ -16,16 +30,6 @@ async function addWord(self) {
 		self.disabled = false;
 		wordInput.value = "";
 	}
-}
-
-function updateWordList() {
-	const wordListElement = document.getElementById("wordList");
-	wordListElement.innerHTML = "";
-	wordList.forEach((word, index) => {
-		const li = document.createElement("li");
-		li.textContent = word;
-		wordListElement.appendChild(li);
-	});
 }
 
 let db;
@@ -38,12 +42,11 @@ request.onerror = (event) => {
 request.onsuccess = (event) => {
 	db = event.target.result;
 	console.log("Database opened successfully");
-	// addData({ reading: "いのり", word: "祈り" });
-	updateList();
+	console.log("isRemote", isRemote);
+	refreshList();
 };
 
 request.onupgradeneeded = (event) => {
-	console.log("event", event);
 	db = event.target.result;
 	console.log("Database upgrade needed");
 	const objectStore = db.createObjectStore("words", {
@@ -84,7 +87,6 @@ async function getAllData() {
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => {
 			console.log("Data retrieved successfully");
-			console.log(request.result);
 			resolve(request.result);
 		};
 
@@ -101,16 +103,18 @@ async function getPronounce(word) {
 	const url = `https://kanji2kana-service.vercel.app/tokenize?${params.toString()}`;
 	const response = await fetch(url);
 	const data = await response.json();
-	console.log("Translated data", data);
-	if (data.length > 0) {
-		const word = { reading: data[0].kana, word: data[0].surface };
-		addData(word);
+	data.forEach((item) => {
+		const word = { reading: item.kana, word: item.surface };
+		if (remote.checked) {
+			syncDataToGoogleSheet(word);
+		} else {
+			addData(word);
+		}
 		addWordToList(word);
-	}
+	});
 }
 
 function addWordToList(item) {
-	const wordListElement = document.getElementById("wordList");
 	const li = document.createElement("li");
 	li.dataset.word = item.word;
 	li.dataset.reading = item.reading;
@@ -120,9 +124,8 @@ function addWordToList(item) {
 	wordListElement.appendChild(li);
 }
 
-async function updateList() {
+async function updateListFromLocal() {
 	const list = await getAllData();
-	console.log("List", list);
 	if (list.length === 0) {
 		importBtn.classList.remove("hidden");
 	} else {
@@ -147,10 +150,8 @@ function speakText(text, lang = "ja-JP") {
 	synth.speak(utterance);
 }
 
-const wordListElement = document.getElementById("wordList");
 wordListElement.addEventListener("click", (event) => {
 	const target = event.target;
-	// console.log("target", target);
 	if (target.tagName === "LI") {
 		const word = target.dataset.word;
 		speakText(word);
@@ -178,11 +179,10 @@ async function importWordList() {
 		"https://raw.githubusercontent.com/lfl976/tools/main/wordList.json";
 	const response = await fetch(url);
 	const data = await response.json();
-	console.log("Data", data);
 	data.forEach((item) => {
 		addData(item);
 	});
-	updateList();
+	updateListFromLocal();
 }
 
 function importWordListFromLocal() {
@@ -195,7 +195,6 @@ function importWordListFromLocal() {
 		reader.onload = async (event) => {
 			const data = event.target.result;
 			const list = JSON.parse(data);
-			console.log("List", list);
 			list.forEach((item) => {
 				addData(item);
 				addWordToList(item);
@@ -207,10 +206,83 @@ function importWordListFromLocal() {
 }
 
 function clearList() {
-	const wordListElement = document.getElementById("wordList");
 	wordListElement.innerHTML = "";
-	// const transaction = db.transaction(["words"], "readwrite");
-	// const objectStore = transaction.objectStore("words");
-	// objectStore.clear();
-	indexedDB.deleteDatabase("WordList");
+	const transaction = db.transaction(["words"], "readwrite");
+	const objectStore = transaction.objectStore("words");
+	objectStore.clear();
+	// indexedDB.deleteDatabase("WordList");
 }
+
+function getDataFromGoogleSheet() {
+	// const url =
+	// 	"https://script.google.com/macros/s/AKfycbz8j1o0Xs6oI7Zv1v1V4Y7XyQ0LJWw0G8y9z9z6Lw/exec";
+	if (!localAppScriptId) {
+		alert("Please enter Google App Script ID");
+		return;
+	}
+
+	fetch(url)
+		.then((response) => response.json())
+		.then((data) => {
+			console.log("Data", data);
+			data.forEach((item) => {
+				addWordToList({ word: item[0], reading: item[1] });
+			});
+		});
+}
+
+function syncDataToGoogleSheet(word) {
+	if (!localAppScriptId) {
+		alert("Please enter Google App Script ID");
+		return;
+	}
+
+	const data = {
+		value1: word.word,
+		value2: word.reading,
+	};
+
+	fetch(url, {
+		method: "POST",
+		mode: "no-cors",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(data),
+	})
+		.then((response) => response.text())
+		.then((data) => {
+			console.log("Success:", data);
+		})
+		.catch((error) => {
+			console.error("Error:", error);
+		});
+}
+
+radioButtons.forEach((radio) => {
+	radio.addEventListener("change", function () {
+		const storageOption = document.querySelector(
+			'input[name="storage"]:checked'
+		).value;
+		localStorage.setItem("storageOption", storageOption);
+		refreshList();
+		if (storageOption === "remote") {
+			googleAppScriptId.classList.remove("hidden");
+		} else {
+			googleAppScriptId.classList.add("hidden");
+		}
+	});
+});
+
+function refreshList() {
+	wordListElement.innerHTML = "";
+	if (remote.checked) {
+		getDataFromGoogleSheet();
+	} else {
+		updateListFromLocal();
+	}
+}
+
+googleAppScriptId.addEventListener("change", () => {
+	localStorage.setItem("appScriptIdForWordList", googleAppScriptId.value);
+});

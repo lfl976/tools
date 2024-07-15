@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+}
+
 body {
 	font-family: Arial, sans-serif;
 	background-color: #f4f4f4;
@@ -8,21 +12,47 @@ body {
 	margin: 0;
 }
 
+.w-100 {
+	width: 100%;
+}
+
 .container {
+	display: flex;
+	flex-direction: column;
 	background-color: #fff;
 	padding: 20px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	border-radius: 5px;
+	height: 100vh;
+}
+
+.container > * {
+	flex: 1 1 auto;
+}
+
+#wordList {
+	overflow-y: auto;
 }
 
 h1 {
 	margin-bottom: 20px;
 }
 
+.radio-buttons {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.radio-buttons label {
+	margin: 0 10px;
+	font-size: 14px;
+}
+
 input,
 button {
 	padding: 10px;
-	margin-right: 10px;
+	margin: 10px 0;
 	border: 1px solid #ccc;
 	border-radius: 3px;
 }
