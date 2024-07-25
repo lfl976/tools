@@ -9,3 +9,4 @@
 - Convert Arabic Number to Japanese Number：[converToJapaneseNumber.html](converToJapaneseNumber.html)
 - 和暦/西暦：[wareki2seireki.html](wareki2seireki.html)
 - 単語帳：[tango-chou.html](tango-chou.html)
+- jaapanese translate：[ja_translate.html](ja_translate.html)
