@@ -15,9 +15,9 @@
 		<label>源语言</label>
 		<select id="sourceLanguageInp" onchange="handleSourceLanuage()">
 			<!-- <option value="">请选择语言</option> -->
+			<option value="ja">日语</option>
 			<option value="en">英语</option>
 			<option value="zh">中文</option>
-			<option value="ja">日语</option>
 		</select>
 		<label>目标语言</label>
 		<select id="targetLanguageInp">
@@ -113,15 +113,6 @@
 					.then((translatedText) => console.log(translatedText))
 					.catch((error) => console.error("Error:", error));
 			}
-
-			//   var select = document.getElementById("languageSelect");
-
-			//   languages.forEach(function (language) {
-			//     var option = document.createElement("option");
-			//     option.text = language.name;
-			//     option.value = language.value;
-			//     select.appendChild(option);
-			//   });
 
 			const handleIdChange = () => {
 				const scriptId = document.getElementById("scriptId").value;
