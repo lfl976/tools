@@ -1,6 +1,5 @@
 # tools
 
-- ~~日语面试：[japanese-question.html](japanese-question.html)~~
 - 汉字转假名：[kanji2hiragana.html](kanji2hiragana.html)
 - 语音翻译：[speech-translate.html](speech-translate.html)
 - 文本导出：[export-copy-text.html](export-copy-text.html)
