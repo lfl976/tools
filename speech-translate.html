@@ -66,7 +66,7 @@
         }
       });
 
-      recognition.addEventListener('end', recognition.start);
+      recognition.addEventListener('end', () => recognition.start());
 
       recognition.start();
 
@@ -94,6 +94,7 @@
           })
           .catch((error) => console.error('Error:', error));
       }
+      // 参考：https://script.google.com/d/1qfP-ijqjG6dBzTkb-R7RyAu_2-YTIHcGOkBqWg1CN7eA05qCabxC-61R/edit?usp=sharing
       function testTranslate() {
         const url = `https://script.google.com/macros/s/${scriptId}/exec`; // 用您的Web应用程序的URL替换这里
         const text = 'Hello';
