@@ -1,126 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Speech Recognition</title>
-		<script src="./language.js"></script>
-	</head>
-	<body>
-		<h1>Speech Translate</h1>
-		<h2 id="speech"></h2>
-		<h2 id="translatedText"></h2>
-		<label>google script id</label>
-		<input type="text" id="scriptId" onchange="handleIdChange()" />
-		<label>源语言</label>
-		<select id="sourceLanguageInp" onchange="handleSourceLanuage()">
-			<!-- <option value="">请选择语言</option> -->
-			<option value="ja">日语</option>
-			<option value="en">英语</option>
-			<option value="zh">中文</option>
-		</select>
-		<label>目标语言</label>
-		<select id="targetLanguageInp">
-			<option value="zh">中文</option>
-			<option value="en">英语</option>
-			<option value="ja">日语</option>
-		</select>
-		<!-- 为了让用户可以看到自己说的话，我们在页面中添加了一个可编辑的 div 元素 -->
-		<div class="words" contenteditable></div>
-		<script>
-			const languagesMap = {
-				ja: "ja-JP",
-				en: "en-US",
-				zh: "zh-CN",
-			};
-			window.SpeechRecognition =
-				window.SpeechRecognition || window.webkitSpeechRecognition;
-			const recognition = new SpeechRecognition();
-			// 系统要不要返回临时结果
-			recognition.interimResults = true;
-			const lang = document.getElementById("sourceLanguageInp").value;
-			// https://stackoverflow.com/questions/39603510/speechsynthesisutterance-list-of-languages
-			recognition.lang = lang;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech Recognition</title>
+    <script src="./language.js"></script>
+  </head>
+  <body>
+    <h1>Speech Translate</h1>
+    <h2 id="speech"></h2>
+    <h2 id="translatedText"></h2>
+    <label>google script id</label>
+    <input type="text" id="scriptId" onchange="handleIdChange()" />
+    <label>源语言</label>
+    <select id="sourceLanguageInp" onchange="handleSourceLanuage()">
+      <!-- <option value="">请选择语言</option> -->
+      <option value="ja">日语</option>
+      <option value="en">英语</option>
+      <option value="zh">中文</option>
+    </select>
+    <label>目标语言</label>
+    <select id="targetLanguageInp">
+      <option value="zh">中文</option>
+      <option value="en">英语</option>
+      <option value="ja">日语</option>
+    </select>
+    <!-- 为了让用户可以看到自己说的话，我们在页面中添加了一个可编辑的 div 元素 -->
+    <div class="words" contenteditable></div>
+    <script>
+      const languagesMap = {
+        ja: 'ja-JP',
+        en: 'en-US',
+        zh: 'zh-CN',
+      };
+      window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      // 系统要不要返回临时结果
+      recognition.interimResults = true;
+      const lang = document.getElementById('sourceLanguageInp').value;
+      // https://stackoverflow.com/questions/39603510/speechsynthesisutterance-list-of-languages
+      recognition.lang = lang;
 
-			function handleSourceLanuage() {
-				const lang = document.getElementById("sourceLanguageInp").value;
-				recognition.lang = lang;
-			}
+      function handleSourceLanuage() {
+        const lang = document.getElementById('sourceLanguageInp').value;
+        recognition.lang = lang;
+      }
 
-			const h1 = document.querySelector("#speech");
-			let p = document.createElement("p");
-			const words = document.querySelector(".words");
-			words.appendChild(p);
+      const h1 = document.querySelector('#speech');
+      let p = document.createElement('p');
+      const words = document.querySelector('.words');
+      words.appendChild(p);
 
-			recognition.addEventListener("result", (e) => {
-				const transcript = Array.from(e.results)
-					.map((result) => result[0])
-					.map((result) => result.transcript)
-					.join("");
+      recognition.addEventListener('result', (e) => {
+        const transcript = Array.from(e.results)
+          .map((result) => result[0])
+          .map((result) => result.transcript)
+          .join('');
 
-				p.textContent = transcript;
-				h1.textContent = transcript;
-				if (e.results[0].isFinal) {
-					translate();
-					p = document.createElement("p");
-					words.appendChild(p);
-				}
-			});
+        p.textContent = transcript;
+        h1.textContent = transcript;
+        if (e.results[0].isFinal) {
+          translate();
+          p = document.createElement('p');
+          words.appendChild(p);
+        }
+      });
 
-			recognition.addEventListener("end", recognition.start);
+      recognition.addEventListener('end', recognition.start);
 
-			recognition.start();
+      recognition.start();
 
-			const scriptId = localStorage.getItem("scriptId");
-			if (scriptId) {
-				document.getElementById("scriptId").value = scriptId;
-			}
+      const scriptId = localStorage.getItem('scriptId');
+      if (scriptId) {
+        document.getElementById('scriptId').value = scriptId;
+      }
 
-			// 用fetch API将文本翻译成另一种语言
-			function translate() {
-				const scriptId = document.getElementById("scriptId").value;
-				if (!scriptId) return;
-				const url = `https://script.google.com/macros/s/${scriptId}/exec`; // 用您的Web应用程序的URL替换这里
-				const text = document.getElementById("speech").textContent;
-				const sourceLanguage =
-					document.getElementById("sourceLanguageInp").value;
-				const targetLanguage =
-					document.getElementById("targetLanguageInp").value;
+      // 用fetch API将文本翻译成另一种语言
+      function translate() {
+        const scriptId = document.getElementById('scriptId').value;
+        if (!scriptId) return;
+        const url = `https://script.google.com/macros/s/${scriptId}/exec`; // 用您的Web应用程序的URL替换这里
+        const text = document.getElementById('speech').textContent;
+        const sourceLanguage = document.getElementById('sourceLanguageInp').value;
+        const targetLanguage = document.getElementById('targetLanguageInp').value;
 
-				fetch(
-					url +
-						`?text=${text}&sourceLanguage=${sourceLanguage}&targetLanguage=${targetLanguage}`
-				)
-					.then((response) => response.json())
-					.then((response) => {
-						console.log(response);
-						document.getElementById("translatedText").textContent =
-							response.translatedText;
-					})
-					.catch((error) => console.error("Error:", error));
-			}
-			function testTranslate() {
-				const url = `https://script.google.com/macros/s/${scriptId}/exec`; // 用您的Web应用程序的URL替换这里
-				const text = "Hello";
-				const sourceLanguage = "en";
-				const targetLanguage = "es";
+        fetch(
+          url + `?text=${text}&sourceLanguage=${sourceLanguage}&targetLanguage=${targetLanguage}`
+        )
+          .then((response) => response.json())
+          .then((response) => {
+            console.log(response);
+            document.getElementById('translatedText').textContent = response.translatedText;
+          })
+          .catch((error) => console.error('Error:', error));
+      }
+      function testTranslate() {
+        const url = `https://script.google.com/macros/s/${scriptId}/exec`; // 用您的Web应用程序的URL替换这里
+        const text = 'Hello';
+        const sourceLanguage = 'en';
+        const targetLanguage = 'es';
 
-				fetch(
-					url +
-						`?text=${text}&sourceLanguage=${sourceLanguage}&targetLanguage=${targetLanguage}`
-				)
-					.then((response) => response.text())
-					.then((translatedText) => console.log(translatedText))
-					.catch((error) => console.error("Error:", error));
-			}
+        fetch(
+          url + `?text=${text}&sourceLanguage=${sourceLanguage}&targetLanguage=${targetLanguage}`
+        )
+          .then((response) => response.text())
+          .then((translatedText) => console.log(translatedText))
+          .catch((error) => console.error('Error:', error));
+      }
 
-			const handleIdChange = () => {
-				const scriptId = document.getElementById("scriptId").value;
-				console.log(scriptId);
-				localStorage.setItem("scriptId", scriptId);
-				const url = `https://script.google.com/macros/s/${scriptId}/exec`;
-				console.log(url);
-			};
-		</script>
-	</body>
+      const handleIdChange = () => {
+        const scriptId = document.getElementById('scriptId').value;
+        console.log(scriptId);
+        localStorage.setItem('scriptId', scriptId);
+        const url = `https://script.google.com/macros/s/${scriptId}/exec`;
+        console.log(url);
+      };
+    </script>
+  </body>
 </html>
