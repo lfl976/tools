@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>歌词同步 + 注音（懒加载）</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: auto;
+        padding: 2rem;
+      }
+
+      #lyrics {
+        position: relative;
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        line-height: 2;
+        white-space: pre-wrap;
+      }
+
+      .line {
+        transition: color 0.2s;
+      }
+
+      .active {
+        color: #ff4081;
+        font-weight: bold;
+      }
+
+      .upload-group {
+        margin-bottom: 1rem;
+      }
+
+      ruby {
+        font-size: 1.1em;
+      }
+
+      rt {
+        font-size: 0.6em;
+        color: #666;
+      }
+
+      #toggleWrapper {
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎧 歌词同步 + 日语注音</h1>
+
+    <div class="upload-group">
+      <label
+        >上传 MP3 音频:
+        <input type="file" id="mp3Input" accept="audio/mp3,audio/mp4" />
+      </label>
+    </div>
+
+    <div class="upload-group">
+      <label
+        >上传 LRC 歌词:
+        <input type="file" id="lrcInput" accept=".lrc,.txt" />
+      </label>
+    </div>
+
+    <div class="upload-group">
+      <button id="loadDemo">🎵 加载示例歌曲</button>
+    </div>
+
+    <div id="toggleWrapper">
+      <label>
+        <input type="checkbox" id="toggleFurigana" />
+        显示日文假名注音
+      </label>
+    </div>
+
+    <audio id="audio" controls style="width: 100%; margin-bottom: 1rem"></audio>
+
+    <div id="lyrics">请上传歌词文件 (.lrc)</div>
+
+    <script>
+      const audio = document.getElementById('audio');
+      const lyricsContainer = document.getElementById('lyrics');
+      const toggleFurigana = document.getElementById('toggleFurigana');
+      let lyrics = [];
+      let furiganaLoaded = false; // ✅ 注音是否已加载
+
+      // 解析 LRC
+      const parseLyrics = (text) => {
+        return text
+          .split('\n')
+          .map((line) => {
+            const match = line.match(/\[(\d+):(\d+(?:\.\d+)?)\](.*)/);
+            if (!match) return null;
+            const [, min, sec, lyric] = match;
+            return {
+              time: parseInt(min) * 60 + parseFloat(sec),
+              text: lyric.trim(),
+              furiganaHtml: '',
+            };
+          })
+          .filter(Boolean);
+      };
+
+      // 调用 API 获取注音
+      async function fetchFurigana(sentences) {
+        const res = await fetch('https://kanji2kana-service.vercel.app/batch_tokenize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sentences }),
+        });
+        const data = await res.json();
+        return data.results;
+      }
+
+      // 转换为 ruby 标签
+      function buildRubyLine(tokens) {
+        return tokens
+          .map((token) => {
+            const { surface, kana } = token;
+            if (kana && kana !== surface) {
+              return `<ruby>${surface}<rt>${kana}</rt></ruby>`;
+            } else {
+              return surface;
+            }
+          })
+          .join('');
+      }
+
+      // 渲染歌词（根据是否显示注音）
+      const renderLyrics = () => {
+        const useFurigana = toggleFurigana.checked;
+        lyricsContainer.innerHTML = '';
+        lyrics.forEach((line, i) => {
+          const div = document.createElement('div');
+          div.className = 'line';
+          div.id = `line-${i}`;
+          div.innerHTML = useFurigana && furiganaLoaded ? line.furiganaHtml : line.text;
+          lyricsContainer.appendChild(div);
+        });
+      };
+
+      // 处理注音开关点击
+      toggleFurigana.addEventListener('change', async () => {
+        if (toggleFurigana.checked && !furiganaLoaded) {
+          try {
+            const lines = lyrics.map((l) => l.text);
+            const results = await fetchFurigana(lines);
+            results.forEach((tokens, idx) => {
+              lyrics[idx].furiganaHtml = buildRubyLine(tokens);
+            });
+            furiganaLoaded = true;
+          } catch (err) {
+            alert('注音接口请求失败');
+            toggleFurigana.checked = false;
+            return;
+          }
+        }
+        renderLyrics(); // 不管加载没加载，切换都重新渲染
+      });
+
+      // 高亮歌词行
+      audio.addEventListener('timeupdate', () => {
+        const currentTime = audio.currentTime;
+        let currentIndex = lyrics.findIndex((line, i) => {
+          const next = lyrics[i + 1];
+          return currentTime >= line.time && (!next || currentTime < next.time);
+        });
+
+        document.querySelectorAll('.line').forEach((el) => el.classList.remove('active'));
+
+        if (currentIndex >= 0) {
+          const currentLine = document.getElementById(`line-${currentIndex}`);
+          currentLine.classList.add('active');
+          const top = currentLine.offsetTop - lyricsContainer.clientHeight / 2;
+          lyricsContainer.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+
+      // 上传 MP3 音频
+      document.getElementById('mp3Input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          audio.src = URL.createObjectURL(file);
+        }
+      });
+
+      // 上传歌词
+      document.getElementById('lrcInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            lyrics = parseLyrics(reader.result);
+            furiganaLoaded = false; // ✅ 清除注音缓存
+            renderLyrics();
+          };
+          reader.readAsText(file, 'utf-8');
+        }
+      });
+
+      document.getElementById('loadDemo').addEventListener('click', async () => {
+        const audioPath = 'Wasureji No Kotonoha (忘れじの言の葉).mp4';
+        const lrcPath = '忘れじの言の葉.lrc';
+
+        // 设置音频源
+        audio.src = audioPath;
+        audio.load();
+
+        try {
+          const response = await fetch(lrcPath);
+          const text = await response.text();
+          lyrics = parseLyrics(text);
+          furiganaLoaded = false;
+          renderLyrics();
+        } catch (err) {
+          alert('加载歌词失败，请检查文件路径是否正确');
+        }
+      });
+    </script>
+  </body>
+</html>
