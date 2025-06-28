@@ -2,6 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>歌词同步 + 注音（懒加载）</title>
     <style>
       body {
@@ -202,8 +203,8 @@
       });
 
       document.getElementById('loadDemo').addEventListener('click', async () => {
-        const audioPath = 'Wasureji No Kotonoha (忘れじの言の葉).mp4';
-        const lrcPath = '忘れじの言の葉.lrc';
+        const audioPath = './wasureji-no-kotonoha.mp4';
+        const lrcPath = './wasureji-no-kotonoha.lrc';
 
         // 设置音频源
         audio.src = audioPath;
