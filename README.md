@@ -10,3 +10,4 @@
 - 単語帳：[tango-chou.html](tango-chou.html)
 - japanese translate：[ja_translate.html](ja_translate.html)
 - japanese music player：[jp_music.html](jp_music.html)
+- read japanese：[read-japanese.html](read-japanese.html)

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>日语阅读工具</title>
+    <style>
+      /* 简单样式 */
+      body {
+        font-family: sans-serif;
+        line-height: 2;
+      }
+      #container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+      textarea {
+        width: 100%;
+        height: 150px;
+        margin-bottom: 10px;
+      }
+      #result {
+        border: 1px solid #ccc;
+        padding: 15px;
+        min-height: 200px;
+        font-size: 1.2em;
+      }
+      /* 高亮样式 */
+      .highlight {
+        background-color: #ffecb3;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>日语阅读工具</h1>
+      <p>请在下方文本框中粘贴日语文章：</p>
+      <textarea id="inputText" placeholder="ここに日本語の文章を貼り付けてください..."></textarea>
+      <button id="processBtn">1. 注音</button>
+      <button id="readBtn" disabled>2. 朗读</button>
+      <hr />
+      <h2>处理结果</h2>
+      <div id="result"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
+    <script>
+      // main.js
+
+      // 0. 全局变量和元素获取
+      const inputText = document.getElementById('inputText');
+      const processBtn = document.getElementById('processBtn');
+      const readBtn = document.getElementById('readBtn');
+      const resultDiv = document.getElementById('result');
+
+      let tokenizer = null;
+      let sentences = []; // 用于存放分割后的句子
+
+      // 1. 初始化 Kuromoji.js 分词器
+      kuromoji
+        .builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' })
+        .build((err, t) => {
+          if (err) {
+            console.error('词典加载失败:', err);
+            processBtn.disabled = true;
+            processBtn.textContent = '词典加载失败';
+          } else {
+            tokenizer = t;
+            console.log('词典加载成功！');
+          }
+        });
+
+      // 2. "注音" 按钮事件
+      processBtn.addEventListener('click', () => {
+        if (!tokenizer || !inputText.value) return;
+
+        const text = inputText.value;
+        const tokens = tokenizer.tokenize(text);
+
+        // 生成带 <ruby> 标签的 HTML
+        let html = '';
+        tokens.forEach((token) => {
+          const surface = token.surface_form;
+          const reading = token.reading; // 片假名读音
+
+          // 简单判断是否需要注音（包含汉字）
+          // \u4e00-\u9faf 是汉字的基本范围
+          if (/[一-龠]/.test(surface) && reading) {
+            const hiraganaReading = katakanaToHiragana(reading);
+            html += `<ruby><rb>${surface}</rb><rt>${hiraganaReading}</rt></ruby>`;
+          } else {
+            html += surface;
+          }
+        });
+
+        // 将文本按句子分割并用 span 包裹，为朗读高亮做准备
+        sentences = text.match(/[^。！？]+[。！？]*/g) || [text];
+        let resultHtmlWithSpans = '';
+        let charIndex = 0;
+        sentences.forEach((sentence, index) => {
+          // 在带注音的HTML中找到对应的句子部分，然后包裹起来
+          // 注意：这是一个简化的实现，实际操作会更复杂，因为<ruby>标签改变了字符串长度
+          // 一个更稳妥的方法是先分割句子，再对每个句子分别进行注音处理。
+
+          // 简化版：我们直接对原始文本分割，朗读时高亮注音后的HTML
+          resultHtmlWithSpans += `<span class="sentence" id="sentence-${index}">${sentence.trim()}</span> `;
+        });
+
+        // 为了演示，我们先显示注音后的完整文本
+        resultDiv.innerHTML = html;
+
+        // 注音完成后，激活朗读按钮
+        readBtn.disabled = false;
+      });
+
+      // 3. "朗读" 按钮事件
+      readBtn.addEventListener('click', () => {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel(); // 如果正在朗读，则停止
+        }
+
+        const textToRead = inputText.value;
+        if (!textToRead) return;
+
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.9; // 语速可以调整
+
+        // 在注音后的文本里高亮句子
+        // 先将注音后的HTML按句子分割并包裹
+        prepareHighlightableContent();
+
+        let lastHighlightedIndex = -1;
+
+        utterance.onboundary = (event) => {
+          if (event.name === 'sentence') {
+            const currentIndex = findSentenceIndex(event.charIndex);
+
+            if (currentIndex !== -1 && currentIndex !== lastHighlightedIndex) {
+              // 移除上一个高亮
+              const lastElem = document.getElementById(`sentence-${lastHighlightedIndex}`);
+              if (lastElem) lastElem.classList.remove('highlight');
+
+              // 添加当前高亮
+              const currentElem = document.getElementById(`sentence-${currentIndex}`);
+              if (currentElem) currentElem.classList.add('highlight');
+
+              lastHighlightedIndex = currentIndex;
+            }
+          }
+        };
+
+        utterance.onend = () => {
+          // 朗读结束，移除所有高亮
+          const lastElem = document.getElementById(`sentence-${lastHighlightedIndex}`);
+          if (lastElem) lastElem.classList.remove('highlight');
+        };
+
+        window.speechSynthesis.speak(utterance);
+      });
+
+      // 辅助函数：将片假名转换为平假名
+      function katakanaToHiragana(katakana) {
+        return katakana.replace(/[\u30a1-\u30f6]/g, (char) =>
+          String.fromCharCode(char.charCodeAt(0) - 0x60)
+        );
+      }
+
+      // 辅助函数：准备用于高亮的HTML内容
+      function prepareHighlightableContent() {
+        resultDiv.innerHTML = ''; // 清空
+        let runningLength = 0;
+        sentences.forEach((sentence, index) => {
+          const span = document.createElement('span');
+          span.id = `sentence-${index}`;
+          span.className = 'sentence';
+
+          // 对每个句子单独进行注音
+          const tokens = tokenizer.tokenize(sentence);
+          let sentenceHtml = '';
+          tokens.forEach((token) => {
+            const surface = token.surface_form;
+            const reading = token.reading;
+            if (/[一-龠]/.test(surface) && reading) {
+              sentenceHtml += `<ruby><rb>${surface}</rb><rt>${katakanaToHiragana(
+                reading
+              )}</rt></ruby>`;
+            } else {
+              sentenceHtml += surface;
+            }
+          });
+
+          span.innerHTML = sentenceHtml + ' ';
+          resultDiv.appendChild(span);
+
+          // 记录每个句子的起止位置（在原始文本中）
+          span.dataset.startIndex = runningLength;
+          runningLength += sentence.length;
+          span.dataset.endIndex = runningLength;
+        });
+      }
+
+      // 辅助函数：根据字符索引找到对应的句子索引
+      function findSentenceIndex(charIndex) {
+        const sentenceElements = document.querySelectorAll('.sentence');
+        for (let i = 0; i < sentenceElements.length; i++) {
+          const elem = sentenceElements[i];
+          const start = parseInt(elem.dataset.startIndex, 10);
+          const end = parseInt(elem.dataset.endIndex, 10);
+          if (charIndex >= start && charIndex < end) {
+            return i;
+          }
+        }
+        return -1;
+      }
+    </script>
+  </body>
+</html>
