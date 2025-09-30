@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数字转日语</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input,
+      button {
+        padding: 8px;
+        font-size: 16px;
+        margin-right: 10px;
+      }
+      #result {
+        margin-top: 20px;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>数字转日语</h1>
+    <input type="number" id="numberInput" placeholder="输入数字" />
+    <button onclick="convertNumber()">转换</button>
+
+    <div id="result"></div>
+
+    <script>
+      /**
+       * 数字转日语：输出「汉字表示 + 假名读音」
+       * 支持到 京 (10^16)
+       * 处理特殊读法：1000万=いっせんまん、1000億=いっせんおく、1000兆=いっせんちょう、1京=いっけい
+       */
+      function numberToJapanese(num) {
+        if (num === 0) return '零（ぜろ）';
+
+        const units = [
+          { value: 1e16, kana: 'けい', kanji: '京' },
+          { value: 1e12, kana: 'ちょう', kanji: '兆' },
+          { value: 1e8, kana: 'おく', kanji: '億' },
+          { value: 1e4, kana: 'まん', kanji: '万' },
+          { value: 1, kana: '', kanji: '' },
+        ];
+
+        const smallNumbersKana = {
+          1: 'いち',
+          2: 'に',
+          3: 'さん',
+          4: 'よん',
+          5: 'ご',
+          6: 'ろく',
+          7: 'なな',
+          8: 'はち',
+          9: 'きゅう',
+        };
+
+        const smallNumbersKanji = {
+          1: '一',
+          2: '二',
+          3: '三',
+          4: '四',
+          5: '五',
+          6: '六',
+          7: '七',
+          8: '八',
+          9: '九',
+        };
+
+        const specialReadings = {
+          300: { kana: 'さんびゃく', kanji: '三百' },
+          600: { kana: 'ろっぴゃく', kanji: '六百' },
+          800: { kana: 'はっぴゃく', kanji: '八百' },
+          3000: { kana: 'さんぜん', kanji: '三千' },
+          8000: { kana: 'はっせん', kanji: '八千' },
+        };
+
+        function readBelow10000(n) {
+          let kana = '',
+            kanji = '';
+
+          const thousands = Math.floor(n / 1000);
+          if (thousands) {
+            const val = thousands * 1000;
+            if (specialReadings[val]) {
+              kana += specialReadings[val].kana;
+              kanji += specialReadings[val].kanji;
+            } else if (thousands === 1) {
+              kana += 'せん';
+              kanji += '千';
+            } else {
+              kana += smallNumbersKana[thousands] + 'せん';
+              kanji += smallNumbersKanji[thousands] + '千';
+            }
+          }
+          n %= 1000;
+
+          const hundreds = Math.floor(n / 100);
+          if (hundreds) {
+            const val = hundreds * 100;
+            if (specialReadings[val]) {
+              kana += specialReadings[val].kana;
+              kanji += specialReadings[val].kanji;
+            } else if (hundreds === 1) {
+              kana += 'ひゃく';
+              kanji += '百';
+            } else {
+              kana += smallNumbersKana[hundreds] + 'ひゃく';
+              kanji += smallNumbersKanji[hundreds] + '百';
+            }
+          }
+          n %= 100;
+
+          const tens = Math.floor(n / 10);
+          if (tens) {
+            if (tens === 1) {
+              kana += 'じゅう';
+              kanji += '十';
+            } else {
+              kana += smallNumbersKana[tens] + 'じゅう';
+              kanji += smallNumbersKanji[tens] + '十';
+            }
+          }
+          n %= 10;
+
+          if (n) {
+            kana += smallNumbersKana[n];
+            kanji += smallNumbersKanji[n];
+          }
+
+          return { kana, kanji };
+        }
+
+        let kanaResult = '';
+        let kanjiResult = '';
+        for (let { value, kana, kanji } of units) {
+          if (num >= value) {
+            const quotient = Math.floor(num / value);
+            num %= value;
+
+            let part = readBelow10000(quotient);
+
+            // 特殊处理：1000 + 万/億/兆/京
+            if (quotient === 1000 && value >= 1e4) {
+              part.kana = 'いっせん';
+              part.kanji = '一千';
+            }
+
+            // 特殊处理：1京 → いっけい
+            if (quotient === 1 && value === 1e16) {
+              part.kana = 'いっ';
+              part.kanji = '一';
+            }
+
+            kanaResult += part.kana + kana;
+            kanjiResult += part.kanji + kanji;
+          }
+        }
+
+        return `${kanjiResult}（${kanaResult}）`;
+      }
+
+      function convertNumber() {
+        const input = document.getElementById('numberInput').value;
+        const num = Number(input);
+        if (isNaN(num)) {
+          document.getElementById('result').textContent = '请输入有效数字';
+          return;
+        }
+        const result = numberToJapanese(num);
+        document.getElementById('result').textContent = result;
+      }
+    </script>
+  </body>
+</html>

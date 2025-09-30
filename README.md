@@ -11,3 +11,4 @@
 - japanese translate：[ja_translate.html](ja_translate.html)
 - japanese music player：[jp_music.html](jp_music.html)
 - read japanese：[read-japanese.html](read-japanese.html)
+- numberToJapanese：[numberToJapanese.html](numberToJapanese.html)
