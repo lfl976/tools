@@ -11482,20 +11482,48 @@
           return base.trim();
         }
 
-        // ========= 在“例文”区域插入播放按钮 =========
+        // ========= 在“例文”区域插入播放按钮（支持子标题） =========
         const contentRoot = document.querySelector('article.content') || document;
+
+        // 工具：判断是否标题、取得标题级别
+        function isHeading(el) {
+          return el && /^H[1-6]$/i.test(el.tagName);
+        }
+        function headingLevel(el) {
+          return isHeading(el) ? parseInt(el.tagName.slice(1), 10) : null;
+        }
+
+        // 找到所有标题文本为“例文”的 h2/h3（也可按需放宽为 h1~h6）
         const exampleHeads = Array.from(contentRoot.querySelectorAll('h2,h3')).filter(
           (h) => h.textContent.trim() === '例文'
         );
 
         exampleHeads.forEach((h) => {
+          const baseLevel = headingLevel(h);
           let n = h.nextElementSibling;
-          while (n && !/^H[1-6]$/i.test(n.tagName)) {
-            if (n.matches('p, ul, ol')) {
-              const targets = n.matches('p') ? [n] : Array.from(n.querySelectorAll('li'));
-              targets.forEach((node) => {
-                if (node.querySelector('.tts-btn')) return; // 已加过
-                // 只有当“可提取的日文”存在时才加按钮
+
+          // 遍历到“下一个标题且级别 <= baseLevel”为止
+          while (n && !(isHeading(n) && headingLevel(n) <= baseLevel)) {
+            // 处理段落
+            if (n.matches && n.matches('p')) {
+              const node = n;
+              if (!node.querySelector('.tts-btn')) {
+                const txt = extractJapaneseText(node);
+                if (txt && kanaRe.test(txt)) {
+                  const btn = document.createElement('button');
+                  btn.type = 'button';
+                  btn.className = 'tts-btn';
+                  btn.setAttribute('aria-pressed', 'false');
+                  btn.textContent = '▶︎ 読む';
+                  node.appendChild(btn);
+                }
+              }
+            }
+
+            // 处理列表项（仅顶层 li；若需要可去掉 :scope）
+            if (n.matches && n.matches('ul, ol')) {
+              n.querySelectorAll(':scope > li').forEach((node) => {
+                if (node.querySelector('.tts-btn')) return;
                 const txt = extractJapaneseText(node);
                 if (!txt || !kanaRe.test(txt)) return;
                 const btn = document.createElement('button');
@@ -11506,6 +11534,9 @@
                 node.appendChild(btn);
               });
             }
+
+            // 对于更深层子标题（h3/h4…），这里不拦截，继续向后遍历，
+            // 因为 while 的停止条件是遇到“级别 <= baseLevel”的标题
             n = n.nextElementSibling;
           }
         });
