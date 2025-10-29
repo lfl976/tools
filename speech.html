@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech Recognition</title>
+    <!-- 可选：如果你原本没有 language.js，可以删除这一行 -->
+    <script src="./language.js"></script>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        padding: 16px;
+      }
+      label {
+        display: inline-block;
+        margin: 8px 8px 8px 0;
+      }
+      select,
+      input[type='text'] {
+        padding: 6px 8px;
+        margin-right: 12px;
+      }
+      .row {
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .words {
+        border: 1px solid #ddd;
+        min-height: 120px;
+        padding: 8px;
+        margin-top: 12px;
+        border-radius: 6px;
+      }
+      h2 {
+        margin: 8px 0;
+      }
+      .muted {
+        color: #666;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Speech Translate</h1>
+
+    <div class="row">
+      <label>Google Script ID</label>
+      <input type="text" id="scriptId" placeholder="例如：AKfycbxxxxxxxxxxxxxxxx" />
+      <span class="muted">会自动保存</span>
+    </div>
+
+    <div class="row">
+      <label>源语言</label>
+      <select id="sourceLanguageInp"></select>
+
+      <label>目标语言</label>
+      <select id="targetLanguageInp"></select>
+    </div>
+
+    <h3>识别原文</h3>
+    <h2 id="speech"></h2>
+
+    <h3>翻译结果</h3>
+    <h2 id="translatedText"></h2>
+
+    <!-- 为了让用户可以看到自己说的话，我们在页面中添加了一个可编辑的 div 元素 -->
+    <div class="words" contenteditable></div>
+
+    <script>
+      let recognizing = false; // 当前是否在识别会话中
+      let isSwitchingLang = false; // 是否因切换语言而主动结束会话
+      let pendingLang = null; // 等待应用的新 locale（如 ja-JP）
+
+      // --- 工具与状态 ---
+      const $ = (sel) => document.querySelector(sel);
+
+      // 语言显示名（中文）生成器
+      const displayNames = new Intl.DisplayNames(['zh-CN', 'zh'], { type: 'language' });
+
+      // 取 base 语言码：en-US -> en
+      const baseLang = (tag) =>
+        String(tag || '')
+          .split(/[-_]/)[0]
+          .toLowerCase();
+
+      // 从 speechSynthesis 声音中收集可用语言（如 ja-JP、en-US）
+      function collectVoiceLocales() {
+        try {
+          const voices = speechSynthesis.getVoices();
+          const locales = new Set(voices.map((v) => v.lang).filter(Boolean));
+          return Array.from(locales);
+        } catch {
+          return [];
+        }
+      }
+
+      // 将 locale 列表（如 ja-JP, en-US, zh-CN）规约为 base 语言码集合（ja, en, zh）
+      function localesToBaseSet(locales) {
+        const set = new Set();
+        locales.forEach((l) => set.add(baseLang(l)));
+        return set;
+      }
+
+      // 一些常用语言的兜底（如果浏览器不给 voices）
+      const FALLBACK_BASES = [
+        'ja',
+        'en',
+        'zh',
+        'ko',
+        'fr',
+        'de',
+        'es',
+        'it',
+        'ru',
+        'pt',
+        'vi',
+        'id',
+        'th',
+        'hi',
+      ];
+
+      // 用中文生成语言名称，拿不到就回退 code
+      function labelFor(code) {
+        try {
+          return displayNames.of(code) || code;
+        } catch {
+          return code;
+        }
+      }
+
+      // --- SpeechRecognition 初始化 ---
+      window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!window.SpeechRecognition) {
+        alert('当前浏览器不支持 SpeechRecognition（语音识别）。建议使用 Chrome。');
+      }
+      const recognition = window.SpeechRecognition ? new window.SpeechRecognition() : null;
+      if (recognition) {
+        recognition.interimResults = true;
+      }
+
+      const h1 = $('#speech');
+      let p = document.createElement('p');
+      const words = document.querySelector('.words');
+      words.appendChild(p);
+
+      // --- 动态构建下拉列表 ---
+      async function buildLanguageSelects() {
+        // 1) 从 voices 获取 locales
+        let locales = collectVoiceLocales();
+
+        // 兼容：有些浏览器需要等异步事件后才有 voices
+        if (!locales.length) {
+          await new Promise((r) => {
+            const onVoices = () => {
+              speechSynthesis.removeEventListener('voiceschanged', onVoices);
+              r();
+            };
+            speechSynthesis.addEventListener('voiceschanged', onVoices);
+            // 触发一次以促使加载
+            speechSynthesis.getVoices();
+            setTimeout(r, 300);
+          });
+          locales = collectVoiceLocales();
+        }
+
+        // 2) 变成 base 语言集合，若为空，用兜底集
+        let baseSet = localesToBaseSet(locales);
+        if (!baseSet.size) {
+          baseSet = new Set(FALLBACK_BASES);
+        }
+
+        // 3) 生成 options（按字母序）
+        const codes = Array.from(baseSet).sort((a, b) => a.localeCompare(b));
+        const sourceSel = $('#sourceLanguageInp');
+        const targetSel = $('#targetLanguageInp');
+        sourceSel.innerHTML = '';
+        targetSel.innerHTML = '';
+
+        for (const code of codes) {
+          const opt1 = document.createElement('option');
+          opt1.value = code;
+          opt1.textContent = labelFor(code);
+          sourceSel.appendChild(opt1);
+
+          const opt2 = document.createElement('option');
+          opt2.value = code;
+          opt2.textContent = labelFor(code);
+          targetSel.appendChild(opt2);
+        }
+
+        // 恢复上次选择或设定友好默认
+        const savedSource =
+          localStorage.getItem('sourceLanguage') || (baseSet.has('ja') ? 'ja' : codes[0]);
+        const savedTarget =
+          localStorage.getItem('targetLanguage') ||
+          (baseSet.has('zh') ? 'zh' : codes[1] || codes[0]);
+
+        sourceSel.value = savedSource;
+        targetSel.value = savedTarget;
+
+        // 初次设置识别语言：尽量找匹配 locale（如 ja-JP）
+        applyRecognitionLang(savedSource, locales);
+
+        // 绑定事件
+        sourceSel.addEventListener('change', () => {
+          const code = sourceSel.value;
+          localStorage.setItem('sourceLanguage', code);
+          applyRecognitionLang(code, locales);
+        });
+        targetSel.addEventListener('change', () => {
+          const code = targetSel.value;
+          localStorage.setItem('targetLanguage', code);
+        });
+      }
+
+      // 把源语言（base）映射到最合适的 locale（如优先 ja-JP、en-US、zh-CN）
+      function pickBestLocale(base, locales) {
+        // 优先常见地区
+        const preferred =
+          {
+            ja: ['ja-JP'],
+            en: ['en-US', 'en-GB', 'en-AU', 'en-CA'],
+            zh: ['zh-CN', 'zh-TW', 'zh-HK'],
+            pt: ['pt-BR', 'pt-PT'],
+            es: ['es-ES', 'es-MX', 'es-419'],
+          }[base] || [];
+        // 1) 按偏好匹配
+        for (const cand of preferred) {
+          if (locales.includes(cand)) return cand;
+        }
+        // 2) 任一同 base 的 locale
+        const any = locales.find((l) => baseLang(l) === base);
+        if (any) return any;
+        // 3) 退回 base 本身（多数实现也接受）
+        return base;
+      }
+
+      function applyRecognitionLang(base, locales) {
+        if (!recognition) return;
+        const chosen = pickBestLocale(base, locales);
+        pendingLang = chosen;
+
+        if (recognizing) {
+          // 正在识别中：先中止当前会话，等 'end' 再切新语言并重启
+          isSwitchingLang = true;
+          try {
+            // abort 比 stop 更“干净”，不等结果收尾，立刻结束
+            recognition.abort();
+          } catch (e) {}
+        } else {
+          // 不在识别中：直接设置并启动
+          recognition.lang = chosen;
+          try {
+            recognition.start();
+          } catch (e) {}
+        }
+        // console.log('recognition.lang =', chosen);
+      }
+
+      // --- 语音识别事件 ---
+      if (recognition) {
+        recognition.addEventListener('start', () => {
+          recognizing = true;
+        });
+
+        recognition.addEventListener('result', (e) => {
+          const transcript = Array.from(e.results)
+            .map((result) => result[0])
+            .map((result) => result.transcript)
+            .join('');
+
+          p.textContent = transcript;
+          h1.textContent = transcript;
+          if (e.results[0].isFinal) {
+            translate();
+            p = document.createElement('p');
+            words.appendChild(p);
+          }
+        });
+
+        recognition.addEventListener('end', () => {
+          console.log('end');
+          recognizing = false;
+
+          if (isSwitchingLang && pendingLang) {
+            // 真正切换语言并重启
+            recognition.lang = pendingLang;
+            isSwitchingLang = false;
+            // 少量延时更稳（Chrome 有时需要）
+            setTimeout(() => recognition.start(), 150);
+            return;
+          }
+          // 避免因权限或错误造成的快速重启风暴
+          setTimeout(() => recognition.start(), 150);
+        });
+      }
+
+      // --- 本地存储：scriptId ---
+      const scriptIdInput = $('#scriptId');
+      const savedScriptId = localStorage.getItem('scriptId');
+      if (savedScriptId) scriptIdInput.value = savedScriptId;
+      scriptIdInput.addEventListener('change', () => {
+        localStorage.setItem('scriptId', scriptIdInput.value.trim());
+      });
+
+      // --- 翻译请求 ---
+      function translate() {
+        const scriptId = $('#scriptId').value.trim();
+        if (!scriptId) return;
+        const url = `https://script.google.com/macros/s/${scriptId}/exec`;
+        const text = $('#speech').textContent || '';
+        if (!text) return;
+
+        // 注意：Apps Script 端一般用 base 语言码（例如 en/ja/zh）
+        const sourceLanguage = $('#sourceLanguageInp').value;
+        const targetLanguage = $('#targetLanguageInp').value;
+
+        const params = new URLSearchParams({
+          text,
+          sourceLanguage,
+          targetLanguage,
+        });
+
+        fetch(`${url}?${params.toString()}`)
+          .then((res) => res.json())
+          .then((data) => {
+            // 兼容不同返回结构
+            const out = data.translatedText || data.result || data.translation || '';
+            $('#translatedText').textContent = out;
+          })
+          .catch((err) => {
+            console.error('Translate Error:', err);
+          });
+      }
+
+      // 可选测试函数
+      function testTranslate() {
+        const scriptId = $('#scriptId').value.trim();
+        if (!scriptId) return;
+        const url = `https://script.google.com/macros/s/${scriptId}/exec`;
+        const params = new URLSearchParams({
+          text: 'Hello',
+          sourceLanguage: 'en',
+          targetLanguage: 'ja',
+        });
+        fetch(`${url}?${params.toString()}`)
+          .then((res) => res.json())
+          .then(console.log)
+          .catch(console.error);
+      }
+      window.testTranslate = testTranslate; // 控制台可调用
+
+      // --- 启动 ---
+      (async function init() {
+        await buildLanguageSelects();
+        if (recognition) {
+          try {
+            recognition.start();
+          } catch {}
+        }
+      })();
+    </script>
+  </body>
+</html>
