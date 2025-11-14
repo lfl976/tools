@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>数字转日语</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input,
+      button {
+        padding: 6px;
+        font-size: 16px;
+        margin: 4px;
+      }
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+        white-space: pre-line;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 6px 10px;
+        text-align: center;
+      }
+      th {
+        background: #f5f5f5;
+      }
+      .special {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>数字转日语</h1>
+
+    <div>
+      <label>起始数字: <input type="number" id="startInput" placeholder="起始" /></label>
+      <label>结束数字: <input type="number" id="endInput" placeholder="结束 (可选)" /></label>
+      <button onclick="convertRange()">转换</button>
+    </div>
+
+    <div id="result"></div>
+
+    <h2>常见数字读法</h2>
+
+    <h3>零到十</h3>
+    <table>
+      <tr>
+        <th>数字</th>
+        <th>标准读音</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>0</td>
+        <td>れい / ゼロ</td>
+        <td>电话号常用ゼロ</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>いち</td>
+        <td>百/千前省略 → ひゃく / せん</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>に</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>さん</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td class="special">し / よん</td>
+        <td>避免和「死」谐音常用よん</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>ご</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>ろく</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td class="special">しち / なな</td>
+        <td>避免混淆常用なな</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>はち</td>
+        <td>遇促音 → <span class="special">はっ</span></td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td class="special">きゅう / く</td>
+        <td>避免和「苦」谐音常用きゅう</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>じゅう</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <h3>百位（ひゃく）</h3>
+    <table>
+      <tr>
+        <th>数字</th>
+        <th>读法</th>
+      </tr>
+      <tr>
+        <td>100</td>
+        <td>ひゃく</td>
+      </tr>
+      <tr>
+        <td>200</td>
+        <td>にひゃく</td>
+      </tr>
+      <tr>
+        <td>300</td>
+        <td class="special">さんびゃく</td>
+      </tr>
+      <tr>
+        <td>400</td>
+        <td>よんひゃく</td>
+      </tr>
+      <tr>
+        <td>500</td>
+        <td>ごひゃく</td>
+      </tr>
+      <tr>
+        <td>600</td>
+        <td class="special">ろっぴゃく</td>
+      </tr>
+      <tr>
+        <td>700</td>
+        <td>ななひゃく</td>
+      </tr>
+      <tr>
+        <td>800</td>
+        <td class="special">はっぴゃく</td>
+      </tr>
+      <tr>
+        <td>900</td>
+        <td>きゅうひゃく</td>
+      </tr>
+    </table>
+
+    <h3>千位（せん）</h3>
+    <table>
+      <tr>
+        <th>数字</th>
+        <th>读法</th>
+      </tr>
+      <tr>
+        <td>1000</td>
+        <td>せん</td>
+      </tr>
+      <tr>
+        <td>2000</td>
+        <td>にせん</td>
+      </tr>
+      <tr>
+        <td>3000</td>
+        <td class="special">さんぜん</td>
+      </tr>
+      <tr>
+        <td>4000</td>
+        <td>よんせん</td>
+      </tr>
+      <tr>
+        <td>5000</td>
+        <td>ごせん</td>
+      </tr>
+      <tr>
+        <td>6000</td>
+        <td>ろくせん</td>
+      </tr>
+      <tr>
+        <td>7000</td>
+        <td>ななせん</td>
+      </tr>
+      <tr>
+        <td>8000</td>
+        <td class="special">はっせん</td>
+      </tr>
+      <tr>
+        <td>9000</td>
+        <td>きゅうせん</td>
+      </tr>
+    </table>
+
+    <h3>万以上</h3>
+    <table>
+      <tr>
+        <th>数字</th>
+        <th>读法</th>
+      </tr>
+      <tr>
+        <td>1万</td>
+        <td>いちまん</td>
+      </tr>
+      <tr>
+        <td>10万</td>
+        <td>じゅうまん</td>
+      </tr>
+      <tr>
+        <td>100万</td>
+        <td>ひゃくまん</td>
+      </tr>
+      <tr>
+        <td>1000万</td>
+        <td class="special">いっせんまん</td>
+      </tr>
+      <tr>
+        <td>1億</td>
+        <td>いちおく</td>
+      </tr>
+    </table>
+
+    <script>
+      // 数字转日语（保持你之前的函数）
+      function numberToJapanese(num) {
+        if (num === 0) return '零（ぜろ）';
+
+        const units = [
+          { value: 1e16, kana: 'けい', kanji: '京' },
+          { value: 1e12, kana: 'ちょう', kanji: '兆' },
+          { value: 1e8, kana: 'おく', kanji: '億' },
+          { value: 1e4, kana: 'まん', kanji: '万' },
+          { value: 1, kana: '', kanji: '' },
+        ];
+
+        const smallNumbersKana = {
+          1: 'いち',
+          2: 'に',
+          3: 'さん',
+          4: 'よん',
+          5: 'ご',
+          6: 'ろく',
+          7: 'なな',
+          8: 'はち',
+          9: 'きゅう',
+        };
+        const smallNumbersKanji = {
+          1: '一',
+          2: '二',
+          3: '三',
+          4: '四',
+          5: '五',
+          6: '六',
+          7: '七',
+          8: '八',
+          9: '九',
+        };
+        const specialReadings = {
+          300: { kana: 'さんびゃく', kanji: '三百' },
+          600: { kana: 'ろっぴゃく', kanji: '六百' },
+          800: { kana: 'はっぴゃく', kanji: '八百' },
+          3000: { kana: 'さんぜん', kanji: '三千' },
+          8000: { kana: 'はっせん', kanji: '八千' },
+        };
+
+        function readBelow10000(n) {
+          let kana = '',
+            kanji = '';
+          const thousands = Math.floor(n / 1000);
+          if (thousands) {
+            const val = thousands * 1000;
+            if (specialReadings[val]) {
+              kana += specialReadings[val].kana;
+              kanji += specialReadings[val].kanji;
+            } else if (thousands === 1) {
+              kana += 'せん';
+              kanji += '千';
+            } else {
+              kana += smallNumbersKana[thousands] + 'せん';
+              kanji += smallNumbersKanji[thousands] + '千';
+            }
+          }
+          n %= 1000;
+
+          const hundreds = Math.floor(n / 100);
+          if (hundreds) {
+            const val = hundreds * 100;
+            if (specialReadings[val]) {
+              kana += specialReadings[val].kana;
+              kanji += specialReadings[val].kanji;
+            } else if (hundreds === 1) {
+              kana += 'ひゃく';
+              kanji += '百';
+            } else {
+              kana += smallNumbersKana[hundreds] + 'ひゃく';
+              kanji += smallNumbersKanji[hundreds] + '百';
+            }
+          }
+          n %= 100;
+
+          const tens = Math.floor(n / 10);
+          if (tens) {
+            if (tens === 1) {
+              kana += 'じゅう';
+              kanji += '十';
+            } else {
+              kana += smallNumbersKana[tens] + 'じゅう';
+              kanji += smallNumbersKanji[tens] + '十';
+            }
+          }
+          n %= 10;
+
+          if (n) {
+            kana += smallNumbersKana[n];
+            kanji += smallNumbersKanji[n];
+          }
+          return { kana, kanji };
+        }
+
+        let kanaResult = '',
+          kanjiResult = '';
+        for (let { value, kana, kanji } of units) {
+          if (num >= value) {
+            const quotient = Math.floor(num / value);
+            num %= value;
+
+            let part = readBelow10000(quotient);
+
+            if (quotient === 1000 && value >= 1e4) {
+              part.kana = 'いっせん';
+              part.kanji = '一千';
+            }
+            if (quotient === 1 && value === 1e16) {
+              part.kana = 'いっ';
+              part.kanji = '一';
+            }
+
+            kanaResult += part.kana + kana;
+            kanjiResult += part.kanji + kanji;
+          }
+        }
+        return `${kanjiResult}（${kanaResult}）`;
+      }
+
+      // 范围转换函数
+      function convertRange() {
+        const start = Number(document.getElementById('startInput').value);
+        const endVal = document.getElementById('endInput').value;
+        const end = endVal ? Number(endVal) : start; // 如果没输入结束数字，就等于start
+        const resultDiv = document.getElementById('result');
+
+        if (isNaN(start) || isNaN(end)) {
+          resultDiv.textContent = '请输入有效数字';
+          return;
+        }
+        if (start > end) {
+          resultDiv.textContent = '起始数字不能大于结束数字';
+          return;
+        }
+
+        let output = '';
+        for (let i = start; i <= end; i++) {
+          output += `${i} → ${numberToJapanese(i)}\n`;
+        }
+        resultDiv.textContent = output;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>颜色格式转换工具</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .converter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+      }
+
+      .converter-section:hover {
+        transform: translateY(-2px);
+      }
+
+      .section-title {
+        color: #555;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      label {
+        font-weight: 500;
+        color: #666;
+        min-width: 80px;
+      }
+
+      input[type='text'],
+      input[type='number'],
+      input[type='range'] {
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      input[type='text'] {
+        flex: 1;
+      }
+
+      input[type='number'] {
+        width: 80px;
+      }
+
+      input[type='range'] {
+        flex: 1;
+      }
+
+      input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .color-preview {
+        width: 100px;
+        height: 60px;
+        border: 3px solid #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .color-preview:hover {
+        transform: scale(1.05);
+      }
+
+      .result {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: #495057;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .rgba-inputs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .rgba-input {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .rgba-input label {
+        font-size: 12px;
+        min-width: auto;
+        text-align: center;
+      }
+
+      .error {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      .success {
+        color: #28a745;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 2em;
+        }
+
+        .rgba-inputs {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>颜色格式转换工具</h1>
+
+      <!-- 16进制转RGBA -->
+      <div class="converter-section">
+        <h2 class="section-title">16进制 → RGBA</h2>
+        <div class="input-group">
+          <div class="input-row">
+            <label for="hexInput">16进制:</label>
+            <input type="text" id="hexInput" placeholder="如: #ffffff 或 #ffffff80" maxlength="9" />
+            <div class="color-preview" id="hexPreview"></div>
+          </div>
+          <div class="result" id="hexResult">输入16进制颜色代码查看RGBA结果</div>
+          <div id="hexError" class="error"></div>
+        </div>
+      </div>
+
+      <!-- RGBA转16进制 -->
+      <div class="converter-section">
+        <h2 class="section-title">RGBA → 16进制</h2>
+        <div class="input-group">
+          <div class="rgba-inputs">
+            <div class="rgba-input">
+              <label for="rInput">Red (0-255)</label>
+              <input type="number" id="rInput" min="0" max="255" value="255" />
+              <input type="range" id="rRange" min="0" max="255" value="255" />
+            </div>
+            <div class="rgba-input">
+              <label for="gInput">Green (0-255)</label>
+              <input type="number" id="gInput" min="0" max="255" value="255" />
+              <input type="range" id="gRange" min="0" max="255" value="255" />
+            </div>
+            <div class="rgba-input">
+              <label for="bInput">Blue (0-255)</label>
+              <input type="number" id="bInput" min="0" max="255" value="255" />
+              <input type="range" id="bRange" min="0" max="255" value="255" />
+            </div>
+            <div class="rgba-input">
+              <label for="aInput">Alpha (0-1)</label>
+              <input type="number" id="aInput" min="0" max="1" step="0.01" value="1" />
+              <input type="range" id="aRange" min="0" max="1" step="0.01" value="1" />
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="color-preview" id="rgbaPreview"></div>
+          </div>
+          <div class="result" id="rgbaResult">16进制结果将在这里显示</div>
+          <div id="rgbaError" class="error"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 16进制转RGBA函数
+      function hexToRgba(hex) {
+        // 移除#号
+        hex = hex.replace('#', '');
+
+        // 验证格式
+        if (!/^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(hex)) {
+          throw new Error('无效的16进制格式！请使用6位或8位16进制代码');
+        }
+
+        // 解析RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+
+        // 解析Alpha（如果存在）
+        let a = 1;
+        if (hex.length === 8) {
+          a = parseInt(hex.substring(6, 8), 16) / 255;
+          a = Math.round(a * 100) / 100; // 保留2位小数
+        }
+
+        return { r, g, b, a };
+      }
+
+      // RGBA转16进制函数
+      function rgbaToHex(r, g, b, a) {
+        // 验证范围
+        if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255 || a < 0 || a > 1) {
+          throw new Error('RGBA值超出有效范围！');
+        }
+
+        // 转换为整数
+        r = Math.round(r);
+        g = Math.round(g);
+        b = Math.round(b);
+
+        // 转换为16进制
+        const rHex = r.toString(16).padStart(2, '0');
+        const gHex = g.toString(16).padStart(2, '0');
+        const bHex = b.toString(16).padStart(2, '0');
+
+        let hex = `#${rHex}${gHex}${bHex}`;
+
+        // 如果alpha不是1，添加alpha通道
+        if (a !== 1) {
+          const aHex = Math.round(a * 255)
+            .toString(16)
+            .padStart(2, '0');
+          hex += aHex;
+        }
+
+        return hex.toUpperCase();
+      }
+
+      // 16进制输入处理
+      const hexInput = document.getElementById('hexInput');
+      const hexResult = document.getElementById('hexResult');
+      const hexPreview = document.getElementById('hexPreview');
+      const hexError = document.getElementById('hexError');
+
+      function updateHexToRgba() {
+        try {
+          hexError.textContent = '';
+          const hex = hexInput.value.trim();
+
+          if (!hex) {
+            hexResult.textContent = '输入16进制颜色代码查看RGBA结果';
+            hexPreview.style.backgroundColor = 'transparent';
+            return;
+          }
+
+          const rgba = hexToRgba(hex);
+
+          // 显示结果
+          hexResult.textContent = `RGBA: rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a})
+RGB: rgb(${rgba.r}, ${rgba.g}, ${rgba.b})
+各通道值:
+- Red: ${rgba.r}
+- Green: ${rgba.g}
+- Blue: ${rgba.b}
+- Alpha: ${rgba.a} (${Math.round(rgba.a * 100)}%)`;
+
+          // 更新预览
+          hexPreview.style.backgroundColor = `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a})`;
+        } catch (error) {
+          hexError.textContent = error.message;
+          hexPreview.style.backgroundColor = 'transparent';
+        }
+      }
+
+      hexInput.addEventListener('input', updateHexToRgba);
+
+      // RGBA输入处理
+      const rInput = document.getElementById('rInput');
+      const gInput = document.getElementById('gInput');
+      const bInput = document.getElementById('bInput');
+      const aInput = document.getElementById('aInput');
+      const rRange = document.getElementById('rRange');
+      const gRange = document.getElementById('gRange');
+      const bRange = document.getElementById('bRange');
+      const aRange = document.getElementById('aRange');
+      const rgbaResult = document.getElementById('rgbaResult');
+      const rgbaPreview = document.getElementById('rgbaPreview');
+      const rgbaError = document.getElementById('rgbaError');
+
+      // 同步输入框和滑块
+      function syncInputs() {
+        rInput.value = rRange.value;
+        gInput.value = gRange.value;
+        bInput.value = bRange.value;
+        aInput.value = aRange.value;
+      }
+
+      function syncRanges() {
+        rRange.value = rInput.value;
+        gRange.value = gInput.value;
+        bRange.value = bInput.value;
+        aRange.value = aInput.value;
+      }
+
+      function updateRgbaToHex() {
+        try {
+          rgbaError.textContent = '';
+
+          const r = parseFloat(rInput.value) || 0;
+          const g = parseFloat(gInput.value) || 0;
+          const b = parseFloat(bInput.value) || 0;
+          const a = parseFloat(aInput.value) || 0;
+
+          const hex = rgbaToHex(r, g, b, a);
+
+          // 显示结果
+          rgbaResult.textContent = `16进制: ${hex}
+RGBA: rgba(${r}, ${g}, ${b}, ${a})
+RGB: rgb(${r}, ${g}, ${b})
+各通道16进制值:
+- Red: ${Math.round(r).toString(16).padStart(2, '0').toUpperCase()}
+- Green: ${Math.round(g).toString(16).padStart(2, '0').toUpperCase()}
+- Blue: ${Math.round(b).toString(16).padStart(2, '0').toUpperCase()}${
+            a !== 1
+              ? `
+- Alpha: ${Math.round(a * 255)
+                  .toString(16)
+                  .padStart(2, '0')
+                  .toUpperCase()}`
+              : ''
+          }`;
+
+          // 更新预览
+          rgbaPreview.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
+        } catch (error) {
+          rgbaError.textContent = error.message;
+          rgbaPreview.style.backgroundColor = 'transparent';
+        }
+      }
+
+      // 添加事件监听器
+      [rInput, gInput, bInput, aInput].forEach((input) => {
+        input.addEventListener('input', () => {
+          syncRanges();
+          updateRgbaToHex();
+        });
+      });
+
+      [rRange, gRange, bRange, aRange].forEach((range) => {
+        range.addEventListener('input', () => {
+          syncInputs();
+          updateRgbaToHex();
+        });
+      });
+
+      // 初始化
+      updateRgbaToHex();
+
+      // 点击预览色块复制颜色值
+      hexPreview.addEventListener('click', () => {
+        if (hexInput.value.trim()) {
+          navigator.clipboard.writeText(hexInput.value.trim());
+        }
+      });
+
+      rgbaPreview.addEventListener('click', () => {
+        const r = parseFloat(rInput.value) || 0;
+        const g = parseFloat(gInput.value) || 0;
+        const b = parseFloat(bInput.value) || 0;
+        const a = parseFloat(aInput.value) || 0;
+        navigator.clipboard.writeText(`rgba(${r}, ${g}, ${b}, ${a})`);
+      });
+    </script>
+  </body>
+</html>
