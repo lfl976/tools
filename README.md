@@ -14,5 +14,6 @@
 - read japanese：[read-japanese.html](read-japanese.html)
 - numberToJapanese：[numberToJapanese.html](numberToJapanese.html)
 - numberToJapanese2：[numberToJapanese2.html](numberToJapanese2.html)
-- n2-grammers：[n2-grammers.html](n2-grammers.html)
+- n2-grammers-ruby：[n2-grammers.html](n2-grammers.html)
+- n2-grammers-txt：[n2-grammers-txt.html](n2-grammers-txt.html)
 - hex-rgb：[hex-rgb.html](hex-rgb.html)

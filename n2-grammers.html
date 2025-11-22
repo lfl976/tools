@@ -160,14 +160,23 @@
     </style>
     <style>
       .tts-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        max-width: var(--content-w);
         display: flex;
+        flex-direction: column;
         gap: 0.8rem;
         align-items: center;
-        margin: 8px 0 16px 0;
+        margin: 8px auto 16px auto;
         font-size: 0.9rem;
+        background: white;
       }
       .tts-panel label {
         opacity: 0.8;
+      }
+      .tts-panel select {
+        width: 176px;
       }
       .tts-btn {
         margin-left: 0.5rem;
