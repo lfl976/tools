@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文字母日语发音转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .result {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 100px;
+            margin-top: 20px;
+        }
+        
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .pronunciation {
+            font-size: 20px;
+            color: #333;
+            line-height: 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .char-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .original-char {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .japanese-char {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .example {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .example strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔤 英文字母日语发音转换器</h1>
+        
+        <div class="input-group">
+            <label for="englishInput">输入英文字母或邮箱地址：</label>
+            <input type="text" id="englishInput" placeholder="例如：abcdtest@gmail.com" autocomplete="off">
+        </div>
+        
+        <div class="result">
+            <h3>日语发音：</h3>
+            <div class="pronunciation" id="output">请在上方输入英文字母...</div>
+        </div>
+        
+        <div class="example">
+            <strong>使用提示：</strong> 输入任何英文字母、数字或符号，系统会自动转换为日语发音。适用于邮箱地址、用户名等场景。
+        </div>
+    </div>
+
+    <script>
+        const pronunciationMap = {
+            'a': 'エー', 'b': 'ビー', 'c': 'シー', 'd': 'ディー', 'e': 'イー',
+            'f': 'エフ', 'g': 'ジー', 'h': 'エイチ', 'i': 'アイ', 'j': 'ジェー',
+            'k': 'ケー', 'l': 'エル', 'm': 'エム', 'n': 'エヌ', 'o': 'オー',
+            'p': 'ピー', 'q': 'キュー', 'r': 'アール', 's': 'エス', 't': 'ティー',
+            'u': 'ユー', 'v': 'ブイ', 'w': 'ダブリュー', 'x': 'エックス', 'y': 'ワイ',
+            'z': 'ゼット',
+            '0': 'ゼロ', '1': 'イチ', '2': 'ニ', '3': 'サン', '4': 'ヨン',
+            '5': 'ゴ', '6': 'ロク', '7': 'ナナ', '8': 'ハチ', '9': 'キュー',
+            '@': 'アット', '.': 'ドット', '-': 'ハイフン', '_': 'アンダーバー',
+            '/': 'スラッシュ', ':': 'コロン', ' ': 'スペース'
+        };
+
+        const input = document.getElementById('englishInput');
+        const output = document.getElementById('output');
+
+        input.addEventListener('input', function() {
+            const text = this.value;
+            if (text === '') {
+                output.innerHTML = '请在上方输入英文字母...';
+                return;
+            }
+
+            let result = '';
+            for (let char of text) {
+                const lowerChar = char.toLowerCase();
+                const pronunciation = pronunciationMap[lowerChar] || char;
+                
+                result += `
+                    <div class="char-item">
+                        <div class="original-char">${char}</div>
+                        <div class="japanese-char">${pronunciation}</div>
+                    </div>
+                `;
+            }
+
+            output.innerHTML = result;
+        });
+
+        // 示例：自动填充示例邮箱
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                input.value = 'abcdtest@gmail.com';
+                input.dispatchEvent(new Event('input'));
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -17,3 +17,5 @@
 - n2-grammers-ruby：[n2-grammers.html](n2-grammers.html)
 - n2-grammers-txt：[n2-grammers-txt.html](n2-grammers-txt.html)
 - hex-rgb：[hex-rgb.html](hex-rgb.html)
+- jp-动词变形表：[动词变形2.html](动词变形2.html)
+- alphabet-pronounce：[alphabet-pronounce.html](alphabet-pronounce.html)
