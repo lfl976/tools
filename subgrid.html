@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Subgrid Compare Demo</title>
+<style>
+  body {
+    font-family: sans-serif;
+    padding: 20px;
+    background: #faf7f2;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  /* -----------------------------------
+     左侧：未使用 subgrid
+  ----------------------------------- */
+  .grid-no-subgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    border: 3px solid #333;
+    padding: 16px;
+    background: white;
+  }
+
+  .grid-no-subgrid .item {
+    display: grid;
+    grid-template-rows: auto auto 1fr; /* 每个子 grid 自己定义行 → 不对齐 */
+    border: 2px solid #333;
+  }
+
+  /* -----------------------------------
+     右侧：使用 subgrid
+  ----------------------------------- */
+  .grid-subgrid-wrapper {
+    border: 3px solid #333;
+    padding: 16px;
+    background: white;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 关键：统一定义行结构 */
+    grid-template-rows: auto 120px 1fr;
+    gap: 12px;
+  }
+
+  .grid-subgrid-wrapper .item {
+    display: grid;
+    grid-template-rows: subgrid; /* ★ 子元素继承父 grid 的行 */
+    grid-row: span 3;            /* ★ 让每个 item 占据父级定义的三行 */
+    border: 2px solid #333;
+  }
+
+  /* -----------------------------------
+     共同样式
+  ----------------------------------- */
+  .item h3 {
+    margin: 0;
+    padding: 12px;
+    border-bottom: 2px solid #333;
+    background: #f7f7f7;
+  }
+
+  .item .image {
+    height: 120px;
+    background: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+  }
+
+  .item p {
+    margin: 0;
+    padding: 12px;
+    line-height: 1.5;
+  }
+
+  .label {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Grid vs Subgrid 对比示例</h2>
+
+<div class="compare">
+
+  <!-- 左侧：未使用 subgrid -->
+  <div>
+    <div class="label">❌ 未使用 subgrid</div>
+    <div class="grid-no-subgrid">
+      <div class="item">
+        <h3>This is a heading</h3>
+        <div class="image">IMG</div>
+        <p>Some description text.</p>
+      </div>
+
+      <div class="item">
+        <h3>This is a heading</h3>
+        <div class="image">IMG</div>
+        <p>Some description text. Some description text.</p>
+      </div>
+
+      <div class="item">
+        <h3>This is a long heading text sample</h3>
+        <div class="image">IMG</div>
+        <p>Some description text.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧：使用 subgrid -->
+  <div>
+    <div class="label">✔ 使用 subgrid</div>
+    <div class="grid-subgrid-wrapper">
+      <div class="item">
+        <h3>This is a heading</h3>
+        <div class="image">IMG</div>
+        <p>Some description text.</p>
+      </div>
+
+      <div class="item">
+        <h3>This is a heading</h3>
+        <div class="image">IMG</div>
+        <p>Some description text. Some description text.</p>
+      </div>
+
+      <div class="item">
+        <h3>This is a long heading text sample</h3>
+        <div class="image">IMG</div>
+        <p>Some description text.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

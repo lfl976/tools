@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Title</h1>
+    <button>Toggle Fullscreen</button>
+    <video src="https://www.w3schools.com/html/mov_bbb.mp4" controls></video>
+
+    <script>
+      const toggleFullscreen = () => {
+        if (!document.webkitIsFullScreen) {
+          document.documentElement.webkitRequestFullscreen();
+        } else {
+          document.webkitExitFullscreen();
+        }
+      };
+
+      document.querySelector('button').addEventListener('click', toggleFullscreen);
+
+      document.addEventListener('webkitfullscreenchange', function () {
+        if (document.webkitIsFullScreen) {
+          console.log('Entered fullscreen mode');
+        } else {
+          console.log('Exited fullscreen mode');
+        }
+      });
+      var video = document.querySelector('video');
+
+      video.addEventListener('webkitbeginfullscreen', () => {
+        console.log('进入 iOS video 全屏');
+      });
+      video.addEventListener('webkitendfullscreen', () => {
+        console.log('退出 iOS video 全屏');
+      });
+    </script>
+  </body>
+</html>
