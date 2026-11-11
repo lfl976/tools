@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>数字转英文单词</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f5f6f8; color: #20242b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  main { max-width: 640px; margin: 64px auto; padding: 0 18px; }
+  h1 { font-size: 26px; margin: 0 0 10px; }
+  .desc { color: #69717e; margin: 0 0 24px; }
+  .panel { background: white; border: 1px solid #e3e6eb; border-radius: 16px; padding: 24px; box-shadow: 0 6px 24px rgba(0,0,0,.035); }
+  .field-label { display: block; font-weight: 600; margin-bottom: 9px; }
+  input[type=text] { width: 100%; font: inherit; font-size: 20px; padding: 12px 14px; border: 1px solid #ccd3dd; border-radius: 9px; outline: none; }
+  input[type=text]:focus { border-color: #487ad3; box-shadow: 0 0 0 3px #487ad322; }
+  .hint { color: #7b8390; font-size: 13px; margin: 8px 0 20px; }
+  .check { display: flex; align-items: center; gap: 10px; margin: 14px 0; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: #315eb0; }
+  .result { margin-top: 23px; padding: 19px; border-radius: 11px; background: #f3f5f8; }
+  .result-label { color: #69717e; font-size: 13px; margin-bottom: 8px; }
+  #output { font-size: 20px; font-weight: 600; line-height: 1.55; overflow-wrap: anywhere; min-height: 30px; }
+  .actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+  button { background: white; border: 1px solid #cbd1da; border-radius: 8px; padding: 8px 15px; cursor: pointer; font: inherit; }
+  button:hover { background: #e8edf5; }
+  .examples { margin-top: 20px; }
+  .examples-label { color: #69717e; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .example-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .example-buttons button { padding: 7px 12px; font-size: 14px; font-variant-numeric: tabular-nums; }
+  #message { color: #39744e; font-size: 13px; margin-left: 10px; }
+  @media(max-width: 480px) { main { margin: 30px auto; } .panel { padding: 18px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>数字转英文单词</h1>
+  <p class="desc">输入整数，选择是否添加 and 和连字符。</p>
+  <section class="panel">
+    <label class="field-label" for="number">输入数字</label>
+    <input id="number" type="text" inputmode="numeric" value="420000" autocomplete="off" />
+    <p class="hint">支持 0 ~ 999,999,999,999</p>
+    <label class="check"><input id="useAnd" type="checkbox" /> 添加 and（英式英语习惯）</label>
+    <label class="check"><input id="useHyphen" type="checkbox" checked /> 添加连字符 -（标准书写）</label>
+    <div class="result">
+      <div class="result-label">转换结果</div>
+      <div id="output">Four Hundred Twenty Thousand</div>
+      <div class="actions"><button id="copy" type="button">复制结果</button><span id="message" role="status" aria-live="polite"></span></div>
+    </div>
+    <div class="examples">
+      <div class="examples-label">快捷数字</div>
+      <div class="example-buttons" id="examples">
+        <button type="button" data-number="21">21</button>
+        <button type="button" data-number="105">105</button>
+        <button type="button" data-number="425">425</button>
+        <button type="button" data-number="1005">1,005</button>
+        <button type="button" data-number="420000">420,000</button>
+        <button type="button" data-number="1234567">1,234,567</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+function numberToWords(num, useAnd = false, useHyphen = true) {
+  if (!Number.isSafeInteger(num) || num < 0 || num > 999999999999) {
+    throw new RangeError("请输入 0 ~ 999999999999 之间的整数");
+  }
+
+  if (num === 0) return "Zero";
+
+  const below20 = [
+    "", "One", "Two", "Three", "Four",
+    "Five", "Six", "Seven", "Eight", "Nine",
+    "Ten", "Eleven", "Twelve", "Thirteen",
+    "Fourteen", "Fifteen", "Sixteen",
+    "Seventeen", "Eighteen", "Nineteen"
+  ];
+
+  const tens = [
+    "", "", "Twenty", "Thirty", "Forty",
+    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+  ];
+
+  const units = ["", "Thousand", "Million", "Billion"];
+
+  // 转换 1 ~ 999
+  function helper(n) {
+    if (n === 0) return "";
+
+    if (n < 20) return below20[n];
+
+    if (n < 100) {
+      const ten = tens[Math.floor(n / 10)];
+      const one = n % 10;
+      if (one === 0) return ten;
+      return ten + (useHyphen ? "-" : " ") + helper(one);
+    }
+
+    const hundred = below20[Math.floor(n / 100)] + " Hundred";
+    const remainder = n % 100;
+    if (remainder === 0) return hundred;
+    return hundred + (useAnd ? " and " : " ") + helper(remainder);
+  }
+
+  const result = [];
+  const lastGroup = num % 1000;
+  let index = 0;
+
+  while (num > 0) {
+    const group = num % 1000;
+    if (group !== 0) {
+      result.unshift(
+        [helper(group), units[index]].filter(Boolean).join(" ")
+      );
+    }
+    num = Math.floor(num / 1000);
+    index++;
+  }
+
+  // 千位以上，最后一组不足 100 时，英式英语添加 and
+  if (useAnd && result.length > 1 && lastGroup > 0 && lastGroup < 100) {
+    return result.slice(0, -1).join(" ") + " and " + result[result.length - 1];
+  }
+
+  return result.join(" ");
+}
+
+const numberInput = document.getElementById("number");
+const useAndInput = document.getElementById("useAnd");
+const useHyphenInput = document.getElementById("useHyphen");
+const output = document.getElementById("output");
+const message = document.getElementById("message");
+
+function update() {
+  message.textContent = "";
+  const raw = numberInput.value.trim();
+  if (!/^\d+$/.test(raw)) {
+    output.textContent = "请输入非负整数";
+    return;
+  }
+  try {
+    output.textContent = numberToWords(Number(raw), useAndInput.checked, useHyphenInput.checked);
+  } catch (error) {
+    output.textContent = error.message;
+  }
+}
+
+document.getElementById("examples").addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-number]");
+  if (!button) return;
+  numberInput.value = button.dataset.number;
+  update();
+});
+
+numberInput.addEventListener("input", update);
+useAndInput.addEventListener("change", update);
+useHyphenInput.addEventListener("change", update);
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(output.textContent);
+    message.textContent = "已复制";
+  } catch (error) {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(output);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    message.textContent = "请手动复制选中的结果";
+  }
+});
+update();
+</script>
+</body>
+</html>

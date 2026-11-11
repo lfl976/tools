@@ -19,3 +19,4 @@
 - hex-rgb：[hex-rgb.html](hex-rgb.html)
 - jp-动词变形表：[动词变形2.html](动词变形2.html)
 - alphabet-pronounce：[alphabet-pronounce.html](alphabet-pronounce.html)
+- 数字转英文单词：[number-to-words-options.html](number-to-words-options.html)
