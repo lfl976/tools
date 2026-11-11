@@ -1,22 +1,24 @@
 # tools
 
-- 汉字转假名：[kanji2hiragana.html](kanji2hiragana.html)
-- 语音翻译：[speech-translate.html](speech-translate.html)
-- 语音翻译：[speech.html](speech.html)
-- 文本导出：[export-copy-text.html](export-copy-text.html)
-- 时间选择器：[date-picker.html](date-picker.html)
-- Tesseract OCR：[tesseract.html](tesseract.html)
-- Convert Arabic Number to Japanese Number：[converToJapaneseNumber.html](converToJapaneseNumber.html)
-- 和暦/西暦：[wareki2seireki.html](wareki2seireki.html)
-- 単語帳：[tango-chou.html](tango-chou.html)
-- japanese translate：[ja_translate.html](ja_translate.html)
-- japanese music player：[jp_music.html](jp_music.html)
-- read japanese：[read-japanese.html](read-japanese.html)
-- numberToJapanese：[numberToJapanese.html](numberToJapanese.html)
-- numberToJapanese2：[numberToJapanese2.html](numberToJapanese2.html)
-- n2-grammers-ruby：[n2-grammers.html](n2-grammers.html)
-- n2-grammers-txt：[n2-grammers-txt.html](n2-grammers-txt.html)
-- hex-rgb：[hex-rgb.html](hex-rgb.html)
-- jp-动词变形表：[动词变形2.html](动词变形2.html)
-- alphabet-pronounce：[alphabet-pronounce.html](alphabet-pronounce.html)
-- 数字转英文单词：[number-to-words-options.html](number-to-words-options.html)
+| Name               | Path                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| 汉字转假名         | [kanji2hiragana.html](kanji2hiragana.html)                   |
+| 语音翻译           | [speech-translate.html](speech-translate.html)               |
+| 语音翻译           | [speech.html](speech.html)                                   |
+| 文本导出           | [export-copy-text.html](export-copy-text.html)               |
+| 时间选择器         | [date-picker.html](date-picker.html)                         |
+| Tesseract OCR      | [tesseract.html](tesseract.html)                             |
+| Number to Japanese | [converToJapaneseNumber.html](converToJapaneseNumber.html)   |
+| 和暦/西暦          | [wareki2seireki.html](wareki2seireki.html)                   |
+| 単語帳             | [tango-chou.html](tango-chou.html)                           |
+| 在线日语翻译       | [ja_translate.html](ja_translate.html)                       |
+| 日语歌词同步       | [jp_music.html](jp_music.html)                               |
+| read japanese      | [read-japanese.html](read-japanese.html)                     |
+| numberToJapanese   | [numberToJapanese.html](numberToJapanese.html)               |
+| numberToJapanese2  | [numberToJapanese2.html](numberToJapanese2.html)             |
+| n2-grammers-ruby   | [n2-grammers.html](n2-grammers.html)                         |
+| n2-grammers-txt    | [n2-grammers-txt.html](n2-grammers-txt.html)                 |
+| 颜色格式转换       | [hex-rgb.html](hex-rgb.html)                                 |
+| jp-动词变形表      | [动词变形2.html](动词变形2.html)                             |
+| 英文字母日语发音   | [alphabet-pronounce.html](alphabet-pronounce.html)           |
+| 数字转英文单词     | [number-to-words-options.html](number-to-words-options.html) |

@@ -43,7 +43,7 @@
       <div id="result"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script> -->
     <script>
       // main.js
 
@@ -57,18 +57,18 @@
       let sentences = []; // 用于存放分割后的句子
 
       // 1. 初始化 Kuromoji.js 分词器
-      kuromoji
-        .builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' })
-        .build((err, t) => {
-          if (err) {
-            console.error('词典加载失败:', err);
-            processBtn.disabled = true;
-            processBtn.textContent = '词典加载失败';
-          } else {
-            tokenizer = t;
-            console.log('词典加载成功！');
-          }
-        });
+      // kuromoji
+      //   .builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' })
+      //   .build((err, t) => {
+      //     if (err) {
+      //       console.error('词典加载失败:', err);
+      //       processBtn.disabled = true;
+      //       processBtn.textContent = '词典加载失败';
+      //     } else {
+      //       tokenizer = t;
+      //       console.log('词典加载成功！');
+      //     }
+      //   });
 
       // 2. "注音" 按钮事件
       processBtn.addEventListener('click', () => {
